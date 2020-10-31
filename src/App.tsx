@@ -1,25 +1,44 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
+import { makeStyles } from '@material-ui/core/styles'
+import NewTask from './tasks/pages/NewTask';
+import Auth from './user/pages/Auth';
+import Navigation from './shared/components/UIElements/Navigation';
+import MainContent from './shared/components/UIElements/MainContent';
 
-function App() {
+
+const useStyles = makeStyles(() => ({
+  root: {
+    display: 'flex',
+  },
+}))
+
+const App = () => {
+  const classes = useStyles();
+
+  let routes: JSX.Element
+  routes = (
+    <Switch>
+        <Route path="/exact">
+        </Route>
+        <Route path="/auth">
+          <Auth />
+        </Route>
+        <Route path="/tasks/new">
+          <NewTask />
+        </Route>
+      </Switch>
+  )
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <Router>
+    <div className={classes.root}>
+      <Navigation />
+
+        <MainContent content={routes} />
+
     </div>
+     </Router>
+
   );
 }
 
