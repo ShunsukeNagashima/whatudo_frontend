@@ -1,17 +1,11 @@
-import React, {useState} from 'react';
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import Link from '@material-ui/core/Link';
-import Grid from '@material-ui/core/Grid';
+import React, {useState, useContext} from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import {Avatar, Button, CssBaseline, TextField, Link, Grid, Typography, Container, CircularProgress} from '@material-ui/core';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
-
+import useAxios from 'axios-hooks';
+import { AuthContext } from '../../shared/contexts/auth-context';
+import { AxiosResponse } from 'axios';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -31,15 +25,98 @@ const useStyles = makeStyles((theme) => ({
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
+  overlay: {
+    height: '100%',
+    width: '100%',
+    position: "absolute",
+    top: 0,
+    left: 0,
+    background: 'rgba(255,255,255,0.8)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
+  }
 }));
+
+interface IFormInputs {
+  userName: string,
+  email: string,
+  password: string
+}
+
+interface AuthApiResponse {
+  userId: string,
+  access_token: string
+}
 
 const Auth = () => {
   const classes = useStyles();
-  const [isLoginMode, setIsLoginMode] = useState(false);
+  const [isLoginMode, setIsLoginMode] = useState(true);
+
+  const auth = useContext(AuthContext);
+
+  const [{ loading, error }, execute ] = useAxios({
+    method: 'POST',
+  },{ manual: true })
 
   const switchModeHandler = () => {
     setIsLoginMode(prevState => !prevState);
   };
+
+  const { errors, control, handleSubmit, formState} = useForm<IFormInputs>({
+    mode: 'onChange'
+  });
+
+  const authSubmitHandler = async (data: IFormInputs, event: any) => {
+    event.preventDefault();
+    if (isLoginMode) {
+      try {
+        const responseData: AxiosResponse<AuthApiResponse> = await execute({
+          url: 'http://localhost:5000/api/auth/login',
+          data: JSON.stringify({
+            email: data.email,
+            password: data.password
+          }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        auth.login(responseData.data.userId, responseData.data.access_token)
+      } catch(err) {
+        console.log(err);
+      }
+    } else {
+      try {
+        const responseData: AxiosResponse<AuthApiResponse> = await execute({
+          url: 'http://localhost:5000/api/users/signup',
+          data: {
+            name: data.userName,
+            email: data.email,
+            password: data.password
+          }
+        });
+        auth.login(responseData.data.userId, responseData.data.access_token)
+      } catch(err) {
+        console.log(err);
+      };
+    }
+  };
+
+  if (error) {
+    return (
+      <div>
+        Error!!
+      </div>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className={classes.overlay}>
+        <CircularProgress />
+      </div>
+    )
+  }
 
   return (
     <Container component="main" maxWidth="xs">
@@ -51,52 +128,68 @@ const Auth = () => {
         <Typography component="h1" variant="h5">
           {!isLoginMode? "Sign up" : "Sign in"}
         </Typography>
-        <form className={classes.form} noValidate>
+        <form className={classes.form} onSubmit={handleSubmit(authSubmitHandler)}>
           <Grid container spacing={2}>
               {!isLoginMode &&
                 <Grid item xs={12}>
-                  <TextField
-                    autoComplete="name"
-                    name="UserName"
-                    variant="outlined"
-                    required
-                    fullWidth
-                    id="firstName"
-                    label="UserName"
-                    autoFocus
+                  <Controller
+                    as={
+                      <TextField
+                        autoComplete="name"
+                        name="UserName"
+                        variant="outlined"
+                        required
+                        fullWidth
+                        id="firstName"
+                        label="UserName"
+                        autoFocus={!isLoginMode}
+                        helperText={errors?.userName?.message}
+                      />
+                    }
+                    name="userName"
+                    control={control}
                   />
                 </Grid>
               }
               <Grid item xs={12}>
-                <TextField
-                  variant="outlined"
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
+                <Controller
+                  as={
+                    <TextField
+                      variant="outlined"
+                      required
+                      fullWidth
+                      id="email"
+                      label="Email Address"
+                      name="email"
+                      autoComplete="email"
+                      autoFocus={isLoginMode}
+                      helperText={errors?.email?.message}
+                    />
+                  }
                   name="email"
-                  autoComplete="email"
-                  autoFocus
+                  control={control}
                 />
               </Grid>
               <Grid item xs={12}>
-                <TextField
-                  variant="outlined"
-                  required
-                  fullWidth
+                <Controller
+                  as={
+                    <TextField
+                      variant="outlined"
+                      required
+                      fullWidth
+                      name="password"
+                      label="Password"
+                      type="password"
+                      id="password"
+                      autoComplete="current-password"
+                      helperText={errors?.password?.message}
+                    />
+                  }
                   name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  autoComplete="current-password"
-                />
+                  control={control}
+                 />
               </Grid>
-              {isLoginMode &&
-              <FormControlLabel
-                control={<Checkbox value="remember" color="primary" />}
-                label="Remember me"
-              />
-              }
+
           </Grid>
 
           <Button
@@ -105,6 +198,7 @@ const Auth = () => {
             variant="contained"
             color="primary"
             className={classes.submit}
+            disabled={!formState.isValid}
           >
             {isLoginMode? "Sign In": "Sign Up"}
           </Button>
@@ -117,7 +211,7 @@ const Auth = () => {
               }
             </Grid>
             <Grid item>
-              <Link href="#" variant="body2" onClick={switchModeHandler}>
+              <Link variant="body2" onClick={switchModeHandler}>
                 {!isLoginMode ? "Already have an account? Sign in": "Don't have an account? Sign Up"}
               </Link>
             </Grid>

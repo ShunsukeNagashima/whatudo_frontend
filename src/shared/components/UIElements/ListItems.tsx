@@ -5,7 +5,6 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import DashboardIcon from '@material-ui/icons/Dashboard';
-import LockOpenIcon from '@material-ui/icons/LockOpen';
 import CreateIcon from '@material-ui/icons/Create';
 import ListAltIcon from '@material-ui/icons/ListAlt';
 import LayersIcon from '@material-ui/icons/Layers';
@@ -19,14 +18,6 @@ export const mainListItems = (
       </ListItemIcon>
       <ListItemText primary="Dashboard" />
     </ListItem>
-    <Link to="/auth">
-      <ListItem button>
-        <ListItemIcon>
-          <LockOpenIcon />
-        </ListItemIcon>
-        <ListItemText primary="Authentication" />
-      </ListItem>
-    </Link>
     <Link to="/tasks/new">
       <ListItem button>
         <ListItemIcon>
@@ -35,12 +26,14 @@ export const mainListItems = (
         <ListItemText primary="Create New Task" />
       </ListItem>
     </Link>
-    <ListItem button>
-      <ListItemIcon>
-        <ListAltIcon />
-      </ListItemIcon>
-      <ListItemText primary="List All Tasks" />
-    </ListItem>
+    <Link to="/tasks">
+      <ListItem button>
+        <ListItemIcon>
+          <ListAltIcon />
+        </ListItemIcon>
+        <ListItemText primary="List All Tasks" />
+      </ListItem>
+    </Link>
     <ListItem button>
       <ListItemIcon>
         <LayersIcon />

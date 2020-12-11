@@ -1,12 +1,11 @@
 import React from 'react';
-// import clsx from 'clsx';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
-// import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Link from '@material-ui/core/Link';
 import { makeStyles } from '@material-ui/core/styles'
+
 
 
 const Copyright = () => {
@@ -53,8 +52,8 @@ const MainContent = (props:MainContentProps) => {
   //c//onst fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
   return (
-    <main className={classes.content}>
-        <div className={classes.appBarSpacer} />
+      <main className={classes.content}>
+      <div className={classes.appBarSpacer} />
         <Container maxWidth="lg" className={classes.container}>
           <Grid container spacing={3}>
             {props.content}
