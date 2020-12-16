@@ -9,6 +9,12 @@ import CreateIcon from '@material-ui/icons/Create';
 import ListAltIcon from '@material-ui/icons/ListAlt';
 import LayersIcon from '@material-ui/icons/Layers';
 import AssignmentIcon from '@material-ui/icons/Assignment';
+import { styled } from '@material-ui/core';
+
+const CustomLink = styled(Link)({
+  textDecoration: 'none',
+  color: 'inherit'
+})
 
 export const mainListItems = (
   <div>
@@ -18,22 +24,22 @@ export const mainListItems = (
       </ListItemIcon>
       <ListItemText primary="Dashboard" />
     </ListItem>
-    <Link to="/tasks/new">
+    <CustomLink to="/tasks/new" >
       <ListItem button>
         <ListItemIcon>
           <CreateIcon />
         </ListItemIcon>
-        <ListItemText primary="Create New Task" />
+        <ListItemText primary="Create New Task"/>
       </ListItem>
-    </Link>
-    <Link to="/tasks">
+    </CustomLink>
+    <CustomLink to="/tasks">
       <ListItem button>
         <ListItemIcon>
           <ListAltIcon />
         </ListItemIcon>
         <ListItemText primary="List All Tasks" />
       </ListItem>
-    </Link>
+    </CustomLink>
     <ListItem button>
       <ListItemIcon>
         <LayersIcon />

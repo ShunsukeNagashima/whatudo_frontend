@@ -11,7 +11,8 @@ interface ITask {
   status: string,
   pic: string,
   limitDate: string,
-  progress: number
+  progress: number,
+  taskId?: string
 }
 
 const TaskList = () => {
@@ -44,9 +45,9 @@ const TaskList = () => {
 
   console.log(loadedTasks)
 
-  loadedTasks && loadedTasks.map((task: ITask) => {
+  loadedTasks && loadedTasks.forEach((task: ITask) => {
     rows.push({
-      id: Math.random().toString(),
+      id: task.taskId!,
       title: task.title,
       category: task.category,
       status: task.status,

@@ -1,14 +1,15 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import 'date-fns';
 import { createStyles, makeStyles, Theme, withStyles } from '@material-ui/core/styles';
-import { TextField, Container, InputLabel, MenuItem, ListSubheader, FormControl, Select, Slider, Typography, Button, CircularProgress} from '@material-ui/core'
+import { TextField, Container, InputLabel, MenuItem, FormControl, Select, Slider, Typography, Button, CircularProgress} from '@material-ui/core'
 import DateFnsUtils from '@date-io/date-fns'
 import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker,
 } from '@material-ui/pickers';
-import useAxios from 'axios-hooks';
+// import useAxios from 'axios-hooks';
+import axios from 'axios';
 import { AuthContext } from '../../shared/contexts/auth-context';
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -78,36 +79,93 @@ const NewTask  = () => {
 
   const classes = useStyles();
   const auth = useContext(AuthContext);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [fetchedUser, setFetchedUser] = useState<any[]>([]);
 
   const { control, handleSubmit, errors, formState} = useForm<IFormInputs>({
     mode: 'onChange'
   });
 
-  const [{ loading, error }, execute] = useAxios({
-    url: 'http:/localhost:5000/api/tasks',
-    method: 'POST',
-    headers: {
-      Authorization: 'Bearer ' + auth.token
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true)
+        const responseData = await axios.get(
+          'http://localhost:5000/api/users/:projectId',
+          {
+            headers: { Authorization: 'Bearer ' + auth.token }
+          }
+        )
+        setFetchedUser(responseData.data)
+      } catch(err) {
+        setError(err.message)
+        setLoading(false);
+      }
+      fetchUsers()
+      setLoading(false);
     }
-  },{ manual: true })
+  }, [])
+
+  // let [{ loading, error }, execute] = useAxios({
+  //   method: 'POST',
+  // },{ manual: true })
+
+  // let [{data}] = useAxios({
+  //   url: 'http://localhost:5000/api/users/:projectId',
+  //   headers: {
+  //     Authorization: 'Bearer ' + auth.token
+  //   }
+  // })
 
   const taskSubmitHandler = async (data: IFormInputs) => {
-      try {
-        await execute({
-          data: {
-            title: data.title,
-            description: data.description,
-            limitDate: data.limitdate,
-            progress: data.progress,
-            status: data.status,
-            groupInCharge: data.groupInCharge,
-            personInCharge: data.personInCharge
+    try {
+      setLoading(true)
+      await axios.post(
+        'http://localhost:5000/api/tasks',
+        {
+          title: data.title,
+          description: data.description,
+          limitDate: data.limitdate,
+          progress: data.progress,
+          status: data.status,
+          groupInCharge: data.groupInCharge,
+          personInCharge: data.personInCharge
+        },
+        {
+          headers: {
+            Authorization: 'Bearer ' + auth.token
           }
-        })
-      } catch(err) {
-        console.log(err);
-      }
-  };
+        }
+      )
+      setLoading(false)
+    } catch(err) {
+      console.log(err);
+      setLoading(false)
+    }
+};
+
+  // const taskSubmitHandler = async (data: IFormInputs) => {
+  //     try {
+  //       await execute({
+  //         url: 'http://localhost:5000/api/tasks',
+  //         data: {
+  //           title: data.title,
+  //           description: data.description,
+  //           limitDate: data.limitdate,
+  //           progress: data.progress,
+  //           status: data.status,
+  //           groupInCharge: data.groupInCharge,
+  //           personInCharge: data.personInCharge
+  //         },
+  //         headers: {
+  //           Authorization: 'Bearer ' + auth.token
+  //         }
+  //       })
+  //     } catch(err) {
+  //       console.log(err);
+  //     }
+  // };
 
   if (error) {
     return (
@@ -199,28 +257,6 @@ const NewTask  = () => {
             />
         </FormControl>
 
-        <div>
-        <FormControl className={classes.formControl}>
-          <InputLabel htmlFor="grouped-native-select">担当グループ</InputLabel>
-          <Controller
-            as={
-              <Select native defaultValue="" id="grouped-native-select">
-                <option aria-label="None" value="" />
-                <optgroup label="Category 1">
-                  <option value={1}>Option 1</option>
-                  <option value={2}>Option 2</option>
-                </optgroup>
-                <optgroup label="Category 2">
-                  <option value={3}>Option 3</option>
-                  <option value={4}>Option 4</option>
-                </optgroup>
-              </Select>
-            }
-            name='groupInCharge'
-            control={control}
-          />
-
-        </FormControl>
         <FormControl className={classes.formControl}>
           <InputLabel htmlFor="grouped-select">担当者</InputLabel>
           <Controller
@@ -229,19 +265,15 @@ const NewTask  = () => {
                 <MenuItem value="">
                   <em>None</em>
                 </MenuItem>
-                <ListSubheader>Category 1</ListSubheader>
-                <MenuItem value={1}>Option 1</MenuItem>
-                <MenuItem value={2}>Option 2</MenuItem>
-                <ListSubheader>Category 2</ListSubheader>
-                <MenuItem value={3}>Option 3</MenuItem>
-                <MenuItem value={4}>Option 4</MenuItem>
+                { fetchedUser.forEach(u => {
+                   <MenuItem value={u.name}>u.name</MenuItem>
+                })}
               </Select>
             }
             name='personInCharge'
             control={control}
           />
         </FormControl>
-      </div>
 
       <FormControl>
         <Typography gutterBottom className={classes.margin_top}>進捗率</Typography>

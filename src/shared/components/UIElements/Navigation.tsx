@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Drawer from '@material-ui/core/Drawer';
@@ -51,6 +52,15 @@ const Navigation = () => {
               <NotificationsIcon />
             </Badge>
           </IconButton>
+          <Link
+            style={{
+              color: 'inherit',
+              textDecoration: 'none'
+            }}
+            to='/projects/new'
+            >
+            New Project
+          </Link>
           <Button
             color="inherit"
             onClick={auth.logout}

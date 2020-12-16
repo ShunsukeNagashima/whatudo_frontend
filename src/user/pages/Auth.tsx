@@ -1,4 +1,5 @@
 import React, {useState, useContext} from 'react';
+import { withRouter,RouteComponentProps } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import {Avatar, Button, CssBaseline, TextField, Link, Grid, Typography, Container, CircularProgress} from '@material-ui/core';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
@@ -6,6 +7,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import useAxios from 'axios-hooks';
 import { AuthContext } from '../../shared/contexts/auth-context';
 import { AxiosResponse } from 'axios';
+import { IProject } from '../../shared/interfaces/shared-interfaces';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -46,10 +48,11 @@ interface IFormInputs {
 
 interface AuthApiResponse {
   userId: string,
+  projects: IProject[],
   access_token: string
 }
 
-const Auth = () => {
+const Auth = (props: RouteComponentProps) => {
   const classes = useStyles();
   const [isLoginMode, setIsLoginMode] = useState(true);
 
@@ -81,7 +84,8 @@ const Auth = () => {
             'Content-Type': 'application/json'
           }
         });
-        auth.login(responseData.data.userId, responseData.data.access_token)
+        auth.login(responseData.data.userId, responseData.data.access_token, responseData.data.projects)
+        props.history.push('/projects/')
       } catch(err) {
         console.log(err);
       }
@@ -95,7 +99,7 @@ const Auth = () => {
             password: data.password
           }
         });
-        auth.login(responseData.data.userId, responseData.data.access_token)
+        auth.login(responseData.data.userId, responseData.data.access_token, responseData.data.projects)
       } catch(err) {
         console.log(err);
       };
@@ -223,4 +227,4 @@ const Auth = () => {
   );
 }
 
-export default Auth;
+export default withRouter(Auth);

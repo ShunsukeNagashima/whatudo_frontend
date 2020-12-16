@@ -4,12 +4,15 @@ import { makeStyles } from '@material-ui/core/styles'
 import NewTask from './tasks/pages/NewTask';
 import Auth from './user/pages/Auth';
 import TaskList from './tasks/pages/TaskList'
+import NewProject from './projects/pages/NewProject';
 import MainContent from './shared/components/UIElements/MainContent';
 import Navigation from './shared/components/UIElements/Navigation';
 import Dashboard from './user/pages/Dashboard';
 import Header from './shared/components/UIElements/Header';
+import ChooseProject from './projects/pages/ChooseProject';
 import { AuthContext } from './shared/contexts/auth-context';
 import { useAuth } from './shared/hooks/auth-hook';
+import { ProjectContext } from './shared/contexts/project-context';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -22,14 +25,16 @@ const useStyles = makeStyles(() => ({
 
 const App = () => {
 
-  const { login, logout, token, userId } = useAuth();
+  const { login, logout, token, userId, allProjects, selectProject, selectedProject  } = useAuth();
 
   const classes = useStyles();
 
   let routes: JSX.Element
   let contents: JSX.Element
 
-  if (token) {
+  console.log(allProjects);
+
+  if (token && selectedProject) {
     routes = (
       <Switch>
         <Route path='/dashboard'>
@@ -41,6 +46,9 @@ const App = () => {
         <Route path='/tasks'>
           <TaskList />
         </Route>
+        <Route path='/projects/new'>
+          <NewProject />
+        </Route>
         <Redirect to='/dashboard' />
       </Switch>
     )
@@ -48,6 +56,21 @@ const App = () => {
       <div className={classes.root}>
         <Navigation />
         <MainContent content={routes} />
+      </div>
+    )
+  } else if (token) {
+    routes = (
+      <Switch>
+        <Route path='/projects'>
+           <ChooseProject />
+         </Route>
+         <Redirect to='/projects' />
+      </Switch>
+    )
+    contents = (
+      <div className={`${classes.root} ${classes.column}`}>
+        <Header />
+        {routes}
       </div>
     )
   } else {
@@ -75,13 +98,22 @@ const App = () => {
         isLoggedIn: !!token,
         token: token,
         userId: userId,
+        projects: allProjects,
         login: login,
         logout: logout
       }}
     >
-      <Router>
+      <ProjectContext.Provider
+        value={{
+          selectedProject: selectedProject,
+          selectProject: selectProject
+        }}
+      >
+        <Router>
           { contents}
-      </Router>
+        </Router>
+      </ProjectContext.Provider>
+
     </AuthContext.Provider>
 
   );

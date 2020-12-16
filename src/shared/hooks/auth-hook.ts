@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { IProject } from '../interfaces/shared-interfaces';
 
 let logoutTimer: NodeJS.Timeout;
 
@@ -6,8 +7,10 @@ export const useAuth = () => {
   const [token, setToken] = useState<string | null>(null);
   const [tokenExpiration, setTokenExpirationDate] = useState<Date | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [allProjects, setAllProjects] = useState<IProject[]>([]);
+  const [selectedProject, setSelectedProject] = useState<IProject | null>(null);
 
-  const login = useCallback((uid: string, token: string, expirationDate?: Date) => {
+  const login = useCallback((uid: string, token: string, projects: IProject[], expirationDate?: Date) => {
     setToken(token);
     const tokenExpiration = expirationDate || new Date(new Date().getTime() + 1000 * 60 * 60);
     setTokenExpirationDate(tokenExpiration);
@@ -16,9 +19,11 @@ export const useAuth = () => {
       JSON.stringify({
         userId: uid,
         token: token,
+        projects: projects,
         expiration: tokenExpiration.toISOString()
       })
     );
+    setAllProjects(projects);
     setUserId(uid);
   },[]);
 
@@ -26,7 +31,20 @@ export const useAuth = () => {
     setToken(null);
     setTokenExpirationDate(null);
     setUserId(null);
+    setAllProjects([]);
+    setSelectedProject(null);
     localStorage.removeItem('userData');
+  }, [])
+
+  const selectProject = useCallback((project: IProject) => {
+    setSelectedProject(project);
+    let storedData;
+    const storageData = localStorage.getItem('userData');
+    if (storageData) {
+      storedData = JSON.parse(storageData);
+    }
+    storedData['project'] = project
+    localStorage.setItem('userData', JSON.stringify(storedData));
   }, [])
 
   useEffect(() => {
@@ -45,9 +63,10 @@ export const useAuth = () => {
       storedData = JSON.parse(storageData);
     }
     if (storedData && storedData.token && new Date(storedData.expiration) > new Date()) {
-      login(storedData.userId, storedData.token, new Date(storedData.expiration))
+      login(storedData.userId, storedData.token, storedData.projects, new Date(storedData.expiration));
+      selectProject(storedData.project)
     }
   },[login])
 
-  return { login, logout, token, userId }
+  return { login, logout, token, userId, allProjects, selectProject, selectedProject }
 }
