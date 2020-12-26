@@ -61,9 +61,15 @@ const App = () => {
   } else if (token) {
     routes = (
       <Switch>
+        <Route path='/projects/new'>
+          <NewProject />
+        </Route>
         <Route path='/projects'>
            <ChooseProject />
          </Route>
+         <Route path='/auth'>
+          <Auth />
+        </Route>
          <Redirect to='/projects' />
       </Switch>
     )

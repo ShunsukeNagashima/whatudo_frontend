@@ -1,13 +1,23 @@
 import React, {useState, useContext} from 'react';
-import { withRouter,RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
-import {Avatar, Button, CssBaseline, TextField, Link, Grid, Typography, Container, CircularProgress} from '@material-ui/core';
+import {
+  Avatar,
+  Button,
+  CssBaseline,
+  TextField,
+  Link, Grid,
+  Typography,
+  Container
+} from '@material-ui/core';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import { makeStyles } from '@material-ui/core/styles';
 import useAxios from 'axios-hooks';
 import { AuthContext } from '../../shared/contexts/auth-context';
 import { AxiosResponse } from 'axios';
 import { IProject } from '../../shared/interfaces/shared-interfaces';
+import Modal from '../../shared/components/UIElements/Modal';
+import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -27,17 +37,7 @@ const useStyles = makeStyles((theme) => ({
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
-  overlay: {
-    height: '100%',
-    width: '100%',
-    position: "absolute",
-    top: 0,
-    left: 0,
-    background: 'rgba(255,255,255,0.8)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center'
-  }
+
 }));
 
 interface IFormInputs {
@@ -52,7 +52,7 @@ interface AuthApiResponse {
   access_token: string
 }
 
-const Auth = (props: RouteComponentProps) => {
+const Auth = () => {
   const classes = useStyles();
   const [isLoginMode, setIsLoginMode] = useState(true);
 
@@ -70,6 +70,8 @@ const Auth = (props: RouteComponentProps) => {
     mode: 'onChange'
   });
 
+  const history = useHistory();
+
   const authSubmitHandler = async (data: IFormInputs, event: any) => {
     event.preventDefault();
     if (isLoginMode) {
@@ -85,7 +87,7 @@ const Auth = (props: RouteComponentProps) => {
           }
         });
         auth.login(responseData.data.userId, responseData.data.access_token, responseData.data.projects)
-        props.history.push('/projects/')
+        history.push('/projects/')
       } catch(err) {
         console.log(err);
       }
@@ -106,24 +108,22 @@ const Auth = (props: RouteComponentProps) => {
     }
   };
 
+  let errorModal;
   if (error) {
-    return (
-      <div>
-        Error!!
-      </div>
-    )
-  }
-
-  if (loading) {
-    return (
-      <div className={classes.overlay}>
-        <CircularProgress />
-      </div>
+    console.log(error.response)
+    errorModal =  (
+        <Modal
+          title={error.name}
+          description={error.response?.data.message}
+          show={true}
+        />
     )
   }
 
   return (
     <Container component="main" maxWidth="xs">
+      <LoadingSpinner isLoading={loading}/>
+      { errorModal }
       <CssBaseline />
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>
@@ -227,4 +227,4 @@ const Auth = (props: RouteComponentProps) => {
   );
 }
 
-export default withRouter(Auth);
+export default Auth;

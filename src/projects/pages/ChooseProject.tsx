@@ -1,23 +1,35 @@
 import React, { useContext } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import Button from '@material-ui/core/Button';
+import {
+  InputLabel,
+  MenuItem,
+  FormControl,
+  Select,
+  Button,
+  Paper,
+  Container,
+  Typography
+} from '@material-ui/core';
 import { IProject } from '../../shared/interfaces/shared-interfaces';
 import { AuthContext } from '../../shared/contexts/auth-context';
 import { ProjectContext } from '../../shared/contexts/project-context';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    button: {
-      display: 'block',
-      marginTop: theme.spacing(2),
+    root: {
+      marginTop: theme.spacing(5)
     },
     formControl: {
-      margin: theme.spacing(1),
-      minWidth: 120,
+      minWidth: 300,
+    },
+    paper: {
+      height: '300px',
+      padding: theme.spacing(2),
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-around',
+      alignItems: 'center'
     },
   }),
 );
@@ -44,38 +56,63 @@ const ChooseProject = () => {
   };
 
   const projectSubmitHandler = (pid: string | undefined) => {
-    const selectedProject = auth.projects.find(p => p._id == pid)
+    const selectedProject = auth.projects.find(p => p._id === pid)
     selectedProject && projectContext.selectProject(selectedProject)
   }
 
-  console.log(project);
+  let content;
+  if (auth.projects.length > 0) {
+    content = (
+      <React.Fragment>
+        <FormControl className={classes.formControl}>
+          <InputLabel id="project-label">Project</InputLabel>
+          <Select
+            labelId="project-label"
+            id="project"
+            open={open}
+            onClose={handleClose}
+            onOpen={handleOpen}
+            value={project}
+            onChange={handleChange}
+          >
+            {
+              auth.projects && auth.projects.map((project: IProject) => {
+                return <MenuItem value={project._id}>{project.name}</MenuItem>
+              })
+            }
+          </Select>
+        </FormControl>
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={!project}
+          onClick={() => projectSubmitHandler(project)}>
+          Sign In With This Project
+        </Button>
+      </React.Fragment>
+    )
+  } else {
+    content = (
+      <Button
+        variant="contained"
+        color="primary"
+        component={RouterLink}
+        to="/projects/new" >
+        Create New Project
+      </Button>
+    )
+
+  }
+
   return (
-    <div>
-      <Button className={classes.button} onClick={handleOpen}>
-        プロジェクトを選択してください
-      </Button>
-      <FormControl className={classes.formControl}>
-        <InputLabel id="project-label">Project</InputLabel>
-        <Select
-          labelId="project-label"
-          id="project"
-          open={open}
-          onClose={handleClose}
-          onOpen={handleOpen}
-          value={project}
-          onChange={handleChange}
-        >
-          {
-            auth.projects && auth.projects.map((project: IProject) => {
-               return <MenuItem value={project._id}>{project.name}</MenuItem>
-            })
-          }
-        </Select>
-      </FormControl>
-      <Button onClick={() => projectSubmitHandler(project)}>
-        Sign In With This Project
-      </Button>
-    </div>
+    <Container component="main" maxWidth="sm" className={classes.root}>
+      <Paper className={classes.paper}>
+          <Typography variant="h4">
+            Choose Your Project
+          </Typography>
+          {content}
+      </Paper>
+    </Container>
   );
 };
 

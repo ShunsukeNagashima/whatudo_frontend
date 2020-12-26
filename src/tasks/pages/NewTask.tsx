@@ -1,16 +1,30 @@
 import React, { useContext, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import 'date-fns';
 import { createStyles, makeStyles, Theme, withStyles } from '@material-ui/core/styles';
-import { TextField, Container, InputLabel, MenuItem, FormControl, Select, Slider, Typography, Button, CircularProgress} from '@material-ui/core'
+import {
+  TextField,
+  Container,
+  InputLabel,
+  MenuItem,
+  FormControl,
+  Select,
+  Slider,
+  Typography,
+  Button
+} from '@material-ui/core'
 import DateFnsUtils from '@date-io/date-fns'
 import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker,
 } from '@material-ui/pickers';
-// import useAxios from 'axios-hooks';
 import axios from 'axios';
 import { AuthContext } from '../../shared/contexts/auth-context';
+import { ProjectContext } from '../../shared/contexts/project-context';
+import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner'
+// import Modal from '../../shared/components/UIElements/Modal'
+import { formatDate } from '../../shared/utils/util-functions';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -65,23 +79,24 @@ const PrettoSlider = withStyles({
 })(Slider);
 
 interface IFormInputs {
+  category: string,
   title: string,
   description: string,
   limitdate: Date,
   progress: number,
   status: string,
-  groupInCharge: string,
   personInCharge: string
-
 }
 
 const NewTask  = () => {
 
   const classes = useStyles();
-  const auth = useContext(AuthContext);
+  const authContext = useContext(AuthContext);
+  const projectContext = useContext(ProjectContext);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [fetchedUser, setFetchedUser] = useState<any[]>([]);
+  const [fetchedUsers, setFetchedUsers] = useState<any[]>([]);
+  const [fetchedCategories, setFetchedCategories] = useState<any[]>([])
 
   const { control, handleSubmit, errors, formState} = useForm<IFormInputs>({
     mode: 'onChange'
@@ -92,33 +107,47 @@ const NewTask  = () => {
       try {
         setLoading(true)
         const responseData = await axios.get(
-          'http://localhost:5000/api/users/:projectId',
+          'http://localhost:5000/api/users/' + projectContext.selectedProject!._id,
           {
-            headers: { Authorization: 'Bearer ' + auth.token }
+            headers: { Authorization: 'Bearer ' + authContext.token }
           }
         )
-        setFetchedUser(responseData.data)
+        setFetchedUsers(responseData.data)
       } catch(err) {
         setError(err.message)
         setLoading(false);
       }
-      fetchUsers()
       setLoading(false);
     }
+    fetchUsers()
   }, [])
 
-  // let [{ loading, error }, execute] = useAxios({
-  //   method: 'POST',
-  // },{ manual: true })
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoading(true)
+        const responseData = await axios.get(
+          'http://localhost:5000/api/categories',
+          {
+            headers: { Authorization: 'Bearer ' + authContext.token }
+          }
+        )
+        setFetchedCategories(responseData.data)
+      } catch(err) {
+        setError(err.message)
+        setLoading(false)
+        throw err;
+      }
+      setLoading(false)
+    }
+    fetchCategories()
+  }, [])
 
-  // let [{data}] = useAxios({
-  //   url: 'http://localhost:5000/api/users/:projectId',
-  //   headers: {
-  //     Authorization: 'Bearer ' + auth.token
-  //   }
-  // })
+  const history = useHistory();
 
   const taskSubmitHandler = async (data: IFormInputs) => {
+    const formatedDate = formatDate(data.limitdate, false)
+    console.log(data.personInCharge);
     try {
       setLoading(true)
       await axios.post(
@@ -126,15 +155,16 @@ const NewTask  = () => {
         {
           title: data.title,
           description: data.description,
-          limitDate: data.limitdate,
+          limitDate: formatedDate,
           progress: data.progress,
           status: data.status,
-          groupInCharge: data.groupInCharge,
-          personInCharge: data.personInCharge
+          personInCharge: data.personInCharge,
+          category: data.category,
+          project: projectContext.selectedProject!._id
         },
         {
           headers: {
-            Authorization: 'Bearer ' + auth.token
+            Authorization: 'Bearer ' + authContext.token
           }
         }
       )
@@ -142,43 +172,44 @@ const NewTask  = () => {
     } catch(err) {
       console.log(err);
       setLoading(false)
+      throw err;
     }
+    history.push('/tasks')
 };
-
-  // const taskSubmitHandler = async (data: IFormInputs) => {
-  //     try {
-  //       await execute({
-  //         url: 'http://localhost:5000/api/tasks',
-  //         data: {
-  //           title: data.title,
-  //           description: data.description,
-  //           limitDate: data.limitdate,
-  //           progress: data.progress,
-  //           status: data.status,
-  //           groupInCharge: data.groupInCharge,
-  //           personInCharge: data.personInCharge
-  //         },
-  //         headers: {
-  //           Authorization: 'Bearer ' + auth.token
-  //         }
-  //       })
-  //     } catch(err) {
-  //       console.log(err);
-  //     }
-  // };
 
   if (error) {
     return (
       <div>
-        ERROR!
+
       </div>
     )
   }
 
   return (
     <Container component="main" maxWidth="md">
+      <LoadingSpinner isLoading={loading} />
       <form className={classes.form} onSubmit={handleSubmit(taskSubmitHandler)}>
-        { loading && <CircularProgress />}
+        <FormControl className={classes.formControl}>
+          <InputLabel id="category">カテゴリ(必須)</InputLabel>
+          <Controller
+            as={
+              <Select
+                id="category"
+                labelId="category"
+              >
+                {
+                  setFetchedCategories && fetchedCategories.map(c => {
+                    return <MenuItem value={c._id}>{c.name}</MenuItem>
+                  })
+                }
+              </Select>
+            }
+            name="category"
+            control={control}
+            rules={{ required: 'カテゴリは必須です'}}
+            />
+        </FormControl>
+
         <Controller
           as={
             <TextField
@@ -188,7 +219,7 @@ const NewTask  = () => {
               fullWidth
               id='title'
               label='タスク名(必須)'
-              // helperText={errors.title.message}
+              // helperText={errors.title!.message}
             />
           }
           name='title'
@@ -222,7 +253,7 @@ const NewTask  = () => {
                     variant='inline'
                     format='yyyy/MM/dd'
                     margin='normal'
-                    id="date-picker-inline"
+                    id="limitdate"
                     label="期限"
                     KeyboardButtonProps={{
                       'aria-label': 'change date',
@@ -258,15 +289,15 @@ const NewTask  = () => {
         </FormControl>
 
         <FormControl className={classes.formControl}>
-          <InputLabel htmlFor="grouped-select">担当者</InputLabel>
+          <InputLabel htmlFor="personInCharge">担当者</InputLabel>
           <Controller
             as={
-              <Select defaultValue="" id="grouped-select">
+              <Select defaultValue="" id="personInCharge">
                 <MenuItem value="">
-                  <em>None</em>
+                  <em>未定</em>
                 </MenuItem>
-                { fetchedUser.forEach(u => {
-                   <MenuItem value={u.name}>u.name</MenuItem>
+                { fetchedUsers && fetchedUsers.map(u => {
+                   return <MenuItem value={u.id}>{u.name}</MenuItem>
                 })}
               </Select>
             }
