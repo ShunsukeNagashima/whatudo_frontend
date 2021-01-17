@@ -14,3 +14,13 @@ export const formatDate = (date: Date, displayTime: boolean) => {
 
   return formatedDate;
 }
+
+export const toDate = (dateString: string) => {
+    const tmpArr = dateString.substring(0,10).split('-');
+    const y = parseInt(tmpArr[0]);
+    const m = parseInt(tmpArr[1]);
+    const d = parseInt(tmpArr[2])
+
+    const date = new Date(y,m - 1,d)
+    return date
+};

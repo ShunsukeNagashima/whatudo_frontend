@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import 'date-fns';
-import { createStyles, makeStyles, Theme, withStyles } from '@material-ui/core/styles';
 import {
   TextField,
   Container,
@@ -10,7 +9,6 @@ import {
   MenuItem,
   FormControl,
   Select,
-  Slider,
   Typography,
   Button
 } from '@material-ui/core'
@@ -19,84 +17,21 @@ import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker,
 } from '@material-ui/pickers';
-import axios from 'axios';
 import { AuthContext } from '../../shared/contexts/auth-context';
 import { ProjectContext } from '../../shared/contexts/project-context';
 import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner'
-// import Modal from '../../shared/components/UIElements/Modal'
-import { formatDate } from '../../shared/utils/util-functions';
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    form: {
-      display: 'flex',
-      flexDirection: 'column'
-    },
-    formControl: {
-      margin: theme.spacing(1),
-      minWidth: 120,
-      alignSelf: 'start'
-    },
-    margin_top: {
-      marginTop: 20
-    },
-    submit: {
-      margin: theme.spacing(3, 0, 2),
-      alignSelf: 'center',
-      minWidth: 200
-    }
-  }),
-);
-
-const PrettoSlider = withStyles({
-  root: {
-    color: '#3880ff',
-    height: 8,
-  },
-  thumb: {
-    height: 24,
-    width: 24,
-    backgroundColor: '#fff',
-    border: '2px solid currentColor',
-    marginTop: -8,
-    marginLeft: -12,
-    '&:focus, &:hover, &$active': {
-      boxShadow: 'inherit',
-    },
-  },
-  active: {},
-  valueLabel: {
-    left: 'calc(-50% + 4px)',
-  },
-  track: {
-    height: 8,
-    borderRadius: 4,
-  },
-  rail: {
-    height: 8,
-    borderRadius: 4,
-  }
-})(Slider);
-
-interface IFormInputs {
-  category: string,
-  title: string,
-  description: string,
-  limitdate: Date,
-  progress: number,
-  status: string,
-  personInCharge: string
-}
+import { formStyles, PrettoSlider } from '../../assets/formStyles';
+import { IFormInputs } from '../../shared/interfaces/shared-interfaces';
+import { useHttpClient } from '../../shared/hooks/http-hook';
 
 const NewTask  = () => {
 
-  const classes = useStyles();
+  const classes = formStyles();
   const authContext = useContext(AuthContext);
   const projectContext = useContext(ProjectContext);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [fetchedUsers, setFetchedUsers] = useState<any[]>([]);
   const [fetchedCategories, setFetchedCategories] = useState<any[]>([])
+  const { sendRequest, loading, error } = useHttpClient();
 
   const { control, handleSubmit, errors, formState} = useForm<IFormInputs>({
     mode: 'onChange'
@@ -105,19 +40,16 @@ const NewTask  = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        setLoading(true)
-        const responseData = await axios.get(
-          'http://localhost:5000/api/users/' + projectContext.selectedProject!._id,
+        const responseData = await sendRequest(
+          `http://localhost:5000/api/users/${projectContext.selectedProject!._id}`,
+          'GET',
+          null,
           {
-            headers: { Authorization: 'Bearer ' + authContext.token }
+            Authorization: `Bearer ${authContext.token}`
           }
         )
         setFetchedUsers(responseData.data)
-      } catch(err) {
-        setError(err.message)
-        setLoading(false);
-      }
-      setLoading(false);
+      } catch(err) {}
     }
     fetchUsers()
   }, [])
@@ -125,20 +57,16 @@ const NewTask  = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        setLoading(true)
-        const responseData = await axios.get(
+        const responseData = await sendRequest(
           'http://localhost:5000/api/categories',
+          'GET',
+          null,
           {
-            headers: { Authorization: 'Bearer ' + authContext.token }
+            Authorization: `Bearer ${authContext.token}`
           }
         )
         setFetchedCategories(responseData.data)
-      } catch(err) {
-        setError(err.message)
-        setLoading(false)
-        throw err;
-      }
-      setLoading(false)
+      } catch(err) {}
     }
     fetchCategories()
   }, [])
@@ -146,16 +74,15 @@ const NewTask  = () => {
   const history = useHistory();
 
   const taskSubmitHandler = async (data: IFormInputs) => {
-    const formatedDate = formatDate(data.limitdate, false)
-    console.log(data.personInCharge);
+    let responseData: any
     try {
-      setLoading(true)
-      await axios.post(
+      responseData = await sendRequest(
         'http://localhost:5000/api/tasks',
+        'POST',
         {
           title: data.title,
           description: data.description,
-          limitDate: formatedDate,
+          limitDate: data.limitDate,
           progress: data.progress,
           status: data.status,
           personInCharge: data.personInCharge,
@@ -163,18 +90,11 @@ const NewTask  = () => {
           project: projectContext.selectedProject!._id
         },
         {
-          headers: {
-            Authorization: 'Bearer ' + authContext.token
-          }
+            Authorization: `Bearer ${authContext.token}`
         }
       )
-      setLoading(false)
-    } catch(err) {
-      console.log(err);
-      setLoading(false)
-      throw err;
-    }
-    history.push('/tasks')
+    } catch(err) {}
+    history.push('/tasks', { message: responseData.data.message})
 };
 
   if (error) {
@@ -198,7 +118,7 @@ const NewTask  = () => {
                 labelId="category"
               >
                 {
-                  setFetchedCategories && fetchedCategories.map(c => {
+                  fetchedCategories && fetchedCategories.map(c => {
                     return <MenuItem value={c._id}>{c.name}</MenuItem>
                   })
                 }
@@ -245,15 +165,15 @@ const NewTask  = () => {
 
           <MuiPickersUtilsProvider utils={DateFnsUtils}>
               <Controller
-                name='limitdate'
+                name='limitDate'
                 control={control}
                 render={({ref, ...rest}) => (
                   <KeyboardDatePicker
                     disableToolbar
                     variant='inline'
-                    format='yyyy/MM/dd'
+                    format='yyyy-MM-dd'
                     margin='normal'
-                    id="limitdate"
+                    id="limitDate"
                     label="期限"
                     KeyboardButtonProps={{
                       'aria-label': 'change date',

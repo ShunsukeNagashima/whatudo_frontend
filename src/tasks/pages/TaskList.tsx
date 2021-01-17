@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { DataGrid, ColDef } from '@material-ui/data-grid';
 import { AuthContext } from '../../shared/contexts/auth-context';
-import useAxios from 'axios-hooks';
 import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner';
 import { ProjectContext } from '../../shared/contexts/project-context';
+import { formatDate } from '../../shared/utils/util-functions';
+import { useHttpClient } from '../../shared/hooks/http-hook';
+import Snackbar from '../../shared/components/UIElements/SnackBar';
 
 interface ITask {
   id: string,
@@ -21,22 +23,43 @@ interface ITask {
   taskId?: string
 }
 
+interface stateType {
+  message: string
+}
+
 const TaskList = () => {
 
   const auth = useContext(AuthContext);
   const project = useContext(ProjectContext);
   const [loadedTasks, setLoadedTask] = useState<any[]>([])
-
-  const  [{ data, loading, error }] = useAxios({
-    url: 'http://localhost:5000/api/tasks/' + project.selectedProject!._id,
-    headers: {
-      Authorization: 'Bearer ' + auth.token
-    }
-  })
+  const [message, setMessage] = useState<string>('');
+  const [showSnackBar, setShowSnackBar] = useState<boolean>(false);
+  const { sendRequest, loading, error } = useHttpClient();
+  const { state } = useLocation<stateType>()
 
   useEffect(() => {
-    setLoadedTask(data);
-  }, [data])
+    const fetchTasks = async () => {
+      const responseData = await sendRequest(
+        `http://localhost:5000/api/tasks?projectId=${project.selectedProject!._id}`,
+        'GET',
+        null,
+        {
+          Authorization: `Bearer ${auth.token}`
+        }
+      );
+      setLoadedTask(responseData.data.tasks)
+    }
+    fetchTasks()
+    if(state) {
+      setMessage(state.message)
+      setShowSnackBar(true)
+    }
+    state && setMessage(state.message)
+  }, [sendRequest])
+
+  const closeSnackBarHandler = () => {
+    setShowSnackBar(false);
+  };
 
   const columns: ColDef[] = [
     { field: 'id',
@@ -60,17 +83,14 @@ const TaskList = () => {
 
   const rows: any[] = []
 
-  console.log(loadedTasks)
-
   loadedTasks && loadedTasks.forEach((task: ITask) => {
-    console.log(task.category)
     rows.push({
       id: task.taskId!,
       title: task.title,
       category: task.category.name,
       status: task.status,
-      personInCharge: task.personInCharge.name,
-      limitDate: task.limitDate,
+      personInCharge: task.personInCharge?.name,
+      limitDate: formatDate(new Date(task.limitDate), false),
       progress: task.progress + '%'
     })
   })
@@ -93,6 +113,12 @@ const TaskList = () => {
           pageSize={5}
           />
       </div>
+
+      <Snackbar
+          open={showSnackBar}
+          close={closeSnackBarHandler}
+          message={message}
+        />
     </React.Fragment>
   );
 };

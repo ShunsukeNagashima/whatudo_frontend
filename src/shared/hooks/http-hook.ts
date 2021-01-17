@@ -1,38 +1,40 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import axios from 'axios';
 
 export const useHttpClient = () => {
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<Error | null>(null);
 
-  const activeHttpRequests = useRef<AbortController[]>([]);
+  const signal = axios.CancelToken.source();
+
+  useEffect(() => {
+    return () => {
+      signal.cancel("Api is being canceled")
+    }
+  }, [])
 
   const sendRequest = useCallback(
-    async (url, method = 'GET', body = null, headers = {}) => {
+    async (url, method = 'GET', data = null, headers = {}) => {
       setLoading(true);
-      const httpAbortCtrl = new AbortController();
-      activeHttpRequests.current.push(httpAbortCtrl);
 
       try {
-        const response = await fetch(url, {
+        const responseData = await axios.request({
           method,
-          body,
+          url,
+          data,
           headers,
-          signal: httpAbortCtrl.signal
-        });
+          cancelToken: signal.token
+        })
+        console.log(headers)
 
-        const responseData = await response.json()
-
-        activeHttpRequests.current = activeHttpRequests.current.filter(
-          reqCtrl => reqCtrl !== httpAbortCtrl
-        )
-
-        if (!response.ok) {
-          throw new Error(responseData.message);
+        if (!(responseData.status === 200 || responseData.status === 201)) {
+          throw new Error(responseData.data.message);
         }
 
         setLoading(false);
         return responseData
       } catch(err) {
+        console.log(err);
         setError(err.message);
         setLoading(false);
         throw err
@@ -44,12 +46,6 @@ export const useHttpClient = () => {
   const clearError = () => {
     setError(null);
   };
-
-  useEffect(() => {
-    return () => {
-      activeHttpRequests.current.forEach(abortCtrl => abortCtrl.abort());
-    }
-  }, [])
 
   return { loading, error, sendRequest, clearError }
 }

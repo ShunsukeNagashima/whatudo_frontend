@@ -10,6 +10,7 @@ import Navigation from './shared/components/UIElements/Navigation';
 import Dashboard from './user/pages/Dashboard';
 import Header from './shared/components/UIElements/Header';
 import ChooseProject from './projects/pages/ChooseProject';
+import UpdateTask from './tasks/pages/UpdateTask';
 import { AuthContext } from './shared/contexts/auth-context';
 import { useAuth } from './shared/hooks/auth-hook';
 import { ProjectContext } from './shared/contexts/project-context';
@@ -40,8 +41,11 @@ const App = () => {
         <Route path='/dashboard'>
           <Dashboard />
         </Route>
-        <Route path='/tasks/new'>
+        <Route path='/tasks/new' exact>
           <NewTask />
+        </Route>
+        <Route path='/tasks/:taskId'>
+          <UpdateTask />
         </Route>
         <Route path='/tasks'>
           <TaskList />

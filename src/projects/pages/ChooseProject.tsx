@@ -108,7 +108,7 @@ const ChooseProject = () => {
     <Container component="main" maxWidth="sm" className={classes.root}>
       <Paper className={classes.paper}>
           <Typography variant="h4">
-            Choose Your Project
+            ログインするプロジェクト
           </Typography>
           {content}
       </Paper>
