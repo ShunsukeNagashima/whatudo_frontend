@@ -10,45 +10,49 @@ import {
 } from '@material-ui/core'
 
 interface DialogProps {
-  buttonType: 'icon' | 'normal',
-  linkText: string | JSX.Element,
+  buttonType?: 'icon' | 'normal',
+  show: boolean,
+  linkText?: string | JSX.Element,
   dialogTitle: string,
   contentText: string,
   ok: string,
   ng: string,
-  action: Function
+  action: Function,
+  openDialog?: (event?: React.SyntheticEvent<Element, Event>) => void
+  closeDialog: (event: React.SyntheticEvent<Element, Event>) => void
 }
 
 const AlertDialog = (props: DialogProps) => {
-  const [open, setOpen] = React.useState(false);
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
 
   const continueAction = (action: Function) => {
     action()
-    setOpen(false)
   }
+
+  let button: JSX.Element | null
+  if (props.linkText) {
+    if(props.buttonType! === 'icon') {
+      button = (
+        <IconButton onClick={props.openDialog}>
+          {props.linkText}
+        </IconButton>
+      )
+    } else {
+      button = (
+        <Button color="primary" onClick={props.openDialog}>
+          {props.linkText}
+        </Button>
+      )
+    }
+  } else {
+    button = null
+  }
+
 
   return (
     <div>
-      {props.buttonType === 'icon'?
-        <IconButton onClick={handleClickOpen}>
-          {props.linkText}
-        </IconButton>
-      :
-        <Button color="primary" onClick={handleClickOpen}>
-          {props.linkText}
-        </Button>
-      }
+      { button }
       <Dialog
-        open={open}
-        onClose={handleClose}
+        open={props.show}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
@@ -62,7 +66,7 @@ const AlertDialog = (props: DialogProps) => {
         <Button onClick={() => continueAction(props.action)} color="primary" autoFocus>
             {props.ok}
           </Button>
-          <Button onClick={handleClose} color="primary">
+          <Button onClick={props.closeDialog} color="primary">
             {props.ng}
           </Button>
         </DialogActions>

@@ -34,6 +34,7 @@ interface CommentItemProps {
 const CommentItem = (props: CommentItemProps) => {
 
   const [ loadedComment, setLoadedComment ] = useState<IComment>()
+  const [ openDialog, setOpenDialog ] = useState<boolean>(false);
   const authContext = useContext(AuthContext);
   const { sendRequest, loading, error } = useHttpClient();
   const classes = formStyles();
@@ -45,6 +46,14 @@ const CommentItem = (props: CommentItemProps) => {
   useEffect(() => {
     setLoadedComment(props.comment)
   },[props.comment])
+
+  const handleOpen = () => {
+    setOpenDialog(true);
+  }
+
+  const handleClose = () => {
+    setOpenDialog(false);
+  }
 
   const updateCommentHandler = async (data: IComment) => {
     console.log(data);
@@ -163,6 +172,7 @@ const CommentItem = (props: CommentItemProps) => {
 
             <Tooltip title='削除' aria-label='delete'>
               <AlertDialog
+                show={openDialog}
                 buttonType='icon'
                 linkText={<DeleteIcon />}
                 dialogTitle='Delete Comment'
@@ -170,6 +180,8 @@ const CommentItem = (props: CommentItemProps) => {
                 ok='OK'
                 ng='キャンセル'
                 action={() => props.deleteComment(loadedComment!._id)}
+                openDialog={handleOpen}
+                closeDialog={handleClose}
               />
             </Tooltip>
           </React.Fragment>
