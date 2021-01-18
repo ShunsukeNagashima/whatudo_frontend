@@ -31,8 +31,8 @@ export const navStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
   },
-  menuButton: {
-    marginRight: 36,
+  menuItem: {
+    marginRight: theme.spacing(2),
   },
   menuButtonHidden: {
     display: 'none',
@@ -78,5 +78,5 @@ export const navStyles = makeStyles((theme) => ({
   },
   fixedHeight: {
     height: 240,
-  },
+  }
 }));
