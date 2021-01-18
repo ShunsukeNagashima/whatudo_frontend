@@ -1,34 +1,46 @@
 import React, { useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import clsx from 'clsx';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import Drawer from '@material-ui/core/Drawer';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import Divider from '@material-ui/core/Divider';
-import IconButton from '@material-ui/core/IconButton';
-import Badge from '@material-ui/core/Badge';
+import {
+  Drawer,
+  AppBar,
+  Toolbar,
+  Typography,
+  Divider,
+  IconButton,
+  Button,
+  List,
+  Select,
+  MenuItem,
+  FormControl
+} from '@material-ui/core'
 import MenuIcon from '@material-ui/icons/Menu';
-import Button from '@material-ui/core/Button';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import NotificationsIcon from '@material-ui/icons/Notifications';
 import { mainListItems } from './ListItems';
-import List from '@material-ui/core/List';
-import {navStyles} from '../../../assets/navStyles';
+import { navStyles } from '../../../assets/navStyles';
 import { AuthContext } from '../../contexts/auth-context';
-
+import { ProjectContext } from '../../contexts/project-context';
+import { IProject } from '../../interfaces/shared-interfaces';
 
 const Navigation = () => {
-  const auth = useContext(AuthContext);
+  const authContext = useContext(AuthContext);
+  const projectContext = useContext(ProjectContext);
   const classes = navStyles();
   const [open, setOpen] = React.useState(true);
+  const history = useHistory();
+
   const handleDrawerOpen = () => {
     setOpen(true);
   };
   const handleDrawerClose = () => {
     setOpen(false);
   };
+
+  const changeProject = (project: IProject) => {
+    projectContext.selectProject(project)
+    history.push('/');
+  }
 
   return (
     <div className={classes.root}>
@@ -40,19 +52,38 @@ const Navigation = () => {
             color="inherit"
             aria-label="open drawer"
             onClick={handleDrawerOpen}
-            className={clsx(classes.menuButton, open && classes.menuButtonHidden)}
+            className={clsx(classes.menuItem, open && classes.menuButtonHidden)}
           >
             <MenuIcon />
           </IconButton>
           <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
             WhatUDo
           </Typography>
-          <IconButton color="inherit">
-            <Badge badgeContent={4} color="secondary">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
+
+          <FormControl variant='outlined'>
+            <Select
+              className={classes.menuItem}
+              style={{'backgroundColor': '#fff'}}
+              id="project"
+              labelId="project"
+              defaultValue={projectContext.selectedProject?._id}
+            >
+              {
+                authContext.projects && authContext.projects.map(p => {
+                  return (
+                    <MenuItem
+                      onClick={() => changeProject(p)}
+                      value={p._id}>
+                      {p.name}
+                    </MenuItem>
+                  )
+                })
+              }
+            </Select>
+          </FormControl>
+
           <Link
+            className={classes.menuItem}
             style={{
               color: 'inherit',
               textDecoration: 'none'
@@ -61,9 +92,10 @@ const Navigation = () => {
             >
             New Project
           </Link>
+
           <Button
             color="inherit"
-            onClick={auth.logout}
+            onClick={authContext.logout}
             >
             Logout
           </Button>

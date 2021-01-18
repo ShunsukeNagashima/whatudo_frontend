@@ -55,7 +55,7 @@ const TaskList = () => {
       setShowSnackBar(true)
     }
     state && setMessage(state.message)
-  }, [sendRequest])
+  }, [sendRequest, project.selectedProject])
 
   const closeSnackBarHandler = () => {
     setShowSnackBar(false);
