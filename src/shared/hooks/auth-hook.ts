@@ -5,22 +5,23 @@ let logoutTimer: NodeJS.Timeout;
 
 export const useAuth = () => {
   const [token, setToken] = useState<string | null>(null);
-  const [tokenExpiration, setTokenExpirationDate] = useState<Date | null>(null);
+  const [tokenExpiration, setTokenExpiration] = useState<Date | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [allProjects, setAllProjects] = useState<IProject[]>([]);
   const [selectedProject, setSelectedProject] = useState<IProject | null>(null);
+  const [open, setOpen] = useState<boolean>(false);
 
   const login = useCallback((uid: string, token: string, projects: IProject[], expirationDate?: Date) => {
     setToken(token);
-    const tokenExpiration = expirationDate || new Date(new Date().getTime() + 1000 * 60 * 60);
-    setTokenExpirationDate(tokenExpiration);
+    const tokenExpirationDate = expirationDate || new Date(new Date().getTime() + 1000 * 60 * 60);
+    setTokenExpiration(tokenExpirationDate);
     localStorage.setItem(
       'userData',
       JSON.stringify({
         userId: uid,
         token: token,
         projects: projects,
-        expiration: tokenExpiration.toISOString()
+        expiration: tokenExpirationDate.toISOString()
       })
     );
     setAllProjects(projects);
@@ -29,11 +30,12 @@ export const useAuth = () => {
 
   const logout = useCallback(() => {
     setToken(null);
-    setTokenExpirationDate(null);
+    setTokenExpiration(null);
     setUserId(null);
     setAllProjects([]);
     setSelectedProject(null);
     localStorage.removeItem('userData');
+    setOpen(false);
   }, [])
 
   const selectProject = useCallback((project: IProject) => {
@@ -50,7 +52,7 @@ export const useAuth = () => {
   useEffect(() => {
     if(token && tokenExpiration) {
       const remainTime = tokenExpiration.getTime() - new Date().getTime();
-      logoutTimer = setTimeout(logout, remainTime)
+      logoutTimer = setTimeout(showLogoutConfimation, remainTime)
     } else {
       clearTimeout(logoutTimer)
     }
@@ -68,5 +70,22 @@ export const useAuth = () => {
     }
   },[login])
 
-  return { login, logout, token, userId, allProjects, selectProject, selectedProject }
+  const showLogoutConfimation = useCallback(() => {
+    setOpen(true)
+  }, [])
+
+  const closeConfimation = useCallback(() => {
+    const tokenExpirationDate = new Date(new Date().getTime() + 1000 * 60 * 60);
+    setTokenExpiration(tokenExpirationDate);
+    let storedData;
+    const storageData = localStorage.getItem('userData');
+    if (storageData) {
+      storedData = JSON.parse(storageData);
+    }
+    storedData['expiration'] = tokenExpirationDate.toISOString()
+    localStorage.setItem('userData', JSON.stringify(storedData));
+    setOpen(false);
+  }, [])
+
+  return { login, logout, token, userId, allProjects, selectProject, selectedProject, open, closeConfimation }
 }

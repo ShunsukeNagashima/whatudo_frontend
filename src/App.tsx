@@ -14,6 +14,7 @@ import UpdateTask from './tasks/pages/UpdateTask';
 import { AuthContext } from './shared/contexts/auth-context';
 import { useAuth } from './shared/hooks/auth-hook';
 import { ProjectContext } from './shared/contexts/project-context';
+import AlertDialog from './shared/components/UIElements/AlertDialog'
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -26,7 +27,7 @@ const useStyles = makeStyles(() => ({
 
 const App = () => {
 
-  const { login, logout, token, userId, allProjects, selectProject, selectedProject  } = useAuth();
+  const { login, logout, token, userId, allProjects, selectProject, selectedProject, open, closeConfimation } = useAuth();
 
   const classes = useStyles();
 
@@ -122,6 +123,16 @@ const App = () => {
         <Router>
           { contents}
         </Router>
+        <AlertDialog
+          show={open}
+          dialogTitle={'セッションタイムアウト'}
+          contentText={'セッションが切れます。ログアウトしますか？'}
+          ok={'ログアウト'}
+          ng={'このまま使用する'}
+          closeDialog={closeConfimation}
+          action={logout}
+        />
+
       </ProjectContext.Provider>
 
     </AuthContext.Provider>
