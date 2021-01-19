@@ -1,5 +1,5 @@
 import React from 'react';
-import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom';
+import {BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles'
 import NewTask from './tasks/pages/NewTask';
 import Auth from './user/pages/Auth';
@@ -33,8 +33,6 @@ const App = () => {
 
   let routes: JSX.Element
   let contents: JSX.Element
-
-  console.log(allProjects);
 
   if (token && selectedProject) {
     routes = (
@@ -126,11 +124,10 @@ const App = () => {
         <AlertDialog
           show={open}
           dialogTitle={'セッションタイムアウト'}
-          contentText={'セッションが切れます。ログアウトしますか？'}
-          ok={'ログアウト'}
-          ng={'このまま使用する'}
+          contentText={'セッションが切れました。再度ログインしてください。'}
+          ok={'ログイン画面へ'}
           closeDialog={closeConfimation}
-          action={logout}
+          actionForYes={logout}
         />
 
       </ProjectContext.Provider>

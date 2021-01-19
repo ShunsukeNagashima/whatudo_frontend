@@ -13,15 +13,21 @@ interface DialogProps {
   dialogTitle: string,
   contentText: string,
   ok: string,
-  ng: string,
-  action: Function,
+  ng?: string,
+  actionForYes?: Function,
+  actionForNo?: Function
   closeDialog: any
 }
 
 const AlertDialog = (props: DialogProps) => {
 
-  const continueAction = (action: Function) => {
-    action()
+  const actionForYes = (action?: Function) => {
+    action && action()
+    props.closeDialog()
+  }
+
+  const actionForNo = (action?: Function) => {
+    action && action()
     props.closeDialog()
   }
 
@@ -38,12 +44,14 @@ const AlertDialog = (props: DialogProps) => {
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-      <Button onClick={() => continueAction(props.action)} color="primary" autoFocus>
+        <Button onClick={() => actionForYes(props.actionForYes && props.actionForYes)} color="primary" autoFocus>
           {props.ok}
         </Button>
-        <Button onClick={props.closeDialog} color="primary">
+        {props.ng &&
+        <Button onClick={() => actionForNo(props.actionForNo && props.actionForNo)} color="primary">
           {props.ng}
         </Button>
+        }
       </DialogActions>
     </Dialog>
   );

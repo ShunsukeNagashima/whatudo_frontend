@@ -182,7 +182,7 @@ const CommentItem = (props: CommentItemProps) => {
               contentText='コメントを削除します。よろしいですか？'
               ok='OK'
               ng='キャンセル'
-              action={() => props.deleteComment(loadedComment!._id)}
+              actionForYes={() => props.deleteComment(loadedComment!._id)}
               closeDialog={handleClose}
             />
           </React.Fragment>
