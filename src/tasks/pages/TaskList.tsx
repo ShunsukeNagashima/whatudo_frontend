@@ -146,7 +146,7 @@ const TaskList = () => {
               contentText='タスクを削除します。よろしいですか？'
               ok='OK'
               ng='キャンセル'
-              action={() => deleteTaskHandler(param.getValue('objId')!.toString())}
+              actionForYes={() => deleteTaskHandler(param.getValue('objId')!.toString())}
               closeDialog={closeDialog}
             />
 

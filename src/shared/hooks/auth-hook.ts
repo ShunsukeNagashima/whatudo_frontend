@@ -75,15 +75,6 @@ export const useAuth = () => {
   }, [])
 
   const closeConfimation = useCallback(() => {
-    const tokenExpirationDate = new Date(new Date().getTime() + 1000 * 60 * 60);
-    setTokenExpiration(tokenExpirationDate);
-    let storedData;
-    const storageData = localStorage.getItem('userData');
-    if (storageData) {
-      storedData = JSON.parse(storageData);
-    }
-    storedData['expiration'] = tokenExpirationDate.toISOString()
-    localStorage.setItem('userData', JSON.stringify(storedData));
     setOpen(false);
   }, [])
 
