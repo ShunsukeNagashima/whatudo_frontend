@@ -162,7 +162,7 @@ const CommentItem = (props: CommentItemProps) => {
           <Typography>{loadedComment?.detail}</Typography>
         </div>
 
-        {/* { loadedComment?.creator._id === authContext.userId && */}
+        { loadedComment?.creator._id === authContext.userId &&
           <React.Fragment>
             <Tooltip title="編集" aria-label='edit'>
               <IconButton onClick={switchEditModeHandler}>
@@ -171,22 +171,23 @@ const CommentItem = (props: CommentItemProps) => {
             </Tooltip>
 
             <Tooltip title='削除' aria-label='delete'>
-              <AlertDialog
-                show={openDialog}
-                buttonType='icon'
-                linkText={<DeleteIcon />}
-                dialogTitle='Delete Comment'
-                contentText='コメントを削除します。よろしいですか？'
-                ok='OK'
-                ng='キャンセル'
-                action={() => props.deleteComment(loadedComment!._id)}
-                openDialog={handleOpen}
-                closeDialog={handleClose}
-              />
+              <IconButton onClick={handleOpen}>
+                <DeleteIcon />
+              </IconButton>
             </Tooltip>
+
+            <AlertDialog
+              show={openDialog}
+              dialogTitle='Delete Comment'
+              contentText='コメントを削除します。よろしいですか？'
+              ok='OK'
+              ng='キャンセル'
+              action={() => props.deleteComment(loadedComment!._id)}
+              closeDialog={handleClose}
+            />
           </React.Fragment>
-        {/* } */}
-        </Paper>
+        }
+      </Paper>
     )
   }
 

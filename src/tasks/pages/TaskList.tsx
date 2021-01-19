@@ -7,9 +7,16 @@ import { ProjectContext } from '../../shared/contexts/project-context';
 import { formatDate } from '../../shared/utils/util-functions';
 import { useHttpClient } from '../../shared/hooks/http-hook';
 import Snackbar from '../../shared/components/UIElements/SnackBar';
+import { createStyles, makeStyles } from '@material-ui/core/styles';
+import {
+ IconButton,
+ Container
+} from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
+import AlertDialog from '../../shared/components/UIElements/AlertDialog';
 
 interface ITask {
-  id: string,
+  _id: string,
   title: string,
   category: {
     name: string;
@@ -27,6 +34,23 @@ interface stateType {
   message: string
 }
 
+const useStyles = makeStyles(() =>
+  createStyles({
+    root: {
+      position: 'relative'
+    },
+    icon: {
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)'
+    },
+    taskTitle: {
+      margin: '0 auto'
+    }
+  })
+)
+
 const TaskList = () => {
 
   const auth = useContext(AuthContext);
@@ -34,8 +58,10 @@ const TaskList = () => {
   const [loadedTasks, setLoadedTask] = useState<any[]>([])
   const [message, setMessage] = useState<string>('');
   const [showSnackBar, setShowSnackBar] = useState<boolean>(false);
+  const [showDialog, setShowDialog] = useState<boolean>(false);
   const { sendRequest, loading, error } = useHttpClient();
   const { state } = useLocation<stateType>()
+  const classes = useStyles();
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -57,34 +83,85 @@ const TaskList = () => {
     state && setMessage(state.message)
   }, [sendRequest, project.selectedProject])
 
-  const closeSnackBarHandler = () => {
+  const openDialog = () => {
+    setShowDialog(true);
+  }
+
+  const closeDialog = () => {
+    setShowDialog(false);
+  }
+
+  const closeSnackBar = () => {
     setShowSnackBar(false);
   };
 
+  const deleteTaskHandler = async (taskId: string) => {
+    const responseData = await sendRequest(
+      `http://localhost:5000/api/tasks/${taskId}`,
+      'DELETE',
+      null,
+      {
+        Authorization: `Bearer ${auth.token}`
+      }
+    )
+    const updatedTasks = loadedTasks.filter(t => t._id !== taskId)
+    setMessage(responseData.data.message);
+    setShowSnackBar(true);
+    setLoadedTask(updatedTasks);
+  };
+
   const columns: ColDef[] = [
-    { field: 'id',
-      headerName: 'ID',
-      width:100
-    },
+    { field: 'objId', hide: true },
+    { field: 'id', headerName: 'ID', width:100, headerAlign: 'center', align: 'center'},
     {
       field: 'title',
       headerName: 'タスク名',
       width: 200,
+      headerAlign: 'center',
       renderCell: (params) => {
-        return (<Link to={`/tasks/${params.getValue('id')}`}>{params.getValue('title')}</Link>)
+        return (<Link className={classes.taskTitle} to={`/tasks/${params.getValue('id')}`}>{params.getValue('title')}</Link>)
       }
     },
-    { field: 'category', headerName: 'カテゴリ', width: 100 },
-    { field: 'status', headerName: 'ステータス', width: 120},
-    { field: 'personInCharge', headerName: '担当者', width: 130 },
-    { field: 'limitDate', headerName: '期限', width: 130 },
-    { field: 'progress', type: 'number', headerName: '進捗率', width: 100, },
+    { field: 'category', headerName: 'カテゴリ', width: 100, headerAlign: 'center', align: 'center' },
+    { field: 'status', headerName: 'ステータス', width: 120, headerAlign: 'center', align: 'center'},
+    { field: 'personInCharge', headerName: '担当者', width: 130, headerAlign: 'center', align: 'center' },
+    { field: 'limitDate', headerName: '期限', width: 130, headerAlign: 'center', align: 'center' },
+    { field: 'progress', type: 'number', headerName: '進捗率', width: 100, headerAlign: 'center' },
+    {
+      field:
+      'delete',
+      headerName: '削除',
+      headerAlign: 'center',
+      width: 80,
+      renderCell: (param) => {
+        return (
+          <Container className={classes.root}>
+            <IconButton className={classes.icon} onClick={openDialog}>
+              <DeleteIcon />
+            </IconButton>
+
+            <AlertDialog
+              show={showDialog}
+              dialogTitle='Delete Task'
+              contentText='タスクを削除します。よろしいですか？'
+              ok='OK'
+              ng='キャンセル'
+              action={() => deleteTaskHandler(param.getValue('objId')!.toString())}
+              closeDialog={closeDialog}
+            />
+
+
+          </Container>
+        )
+      }
+    }
   ];
 
   const rows: any[] = []
 
   loadedTasks && loadedTasks.forEach((task: ITask) => {
     rows.push({
+      objId: task._id,
       id: task.taskId!,
       title: task.title,
       category: task.category.name,
@@ -116,7 +193,7 @@ const TaskList = () => {
 
       <Snackbar
           open={showSnackBar}
-          close={closeSnackBarHandler}
+          close={closeSnackBar}
           message={message}
         />
     </React.Fragment>
