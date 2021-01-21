@@ -1,9 +1,15 @@
-import React, { useContext } from 'react';
-import { Container, TextField, CircularProgress, Button } from '@material-ui/core';
+import React, { useContext, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { Container, TextField, Button } from '@material-ui/core';
 import { useForm, Controller } from 'react-hook-form';
-import useAxios from 'axios-hooks';
 import { AuthContext } from '../../shared/contexts/auth-context';
+import { ProjectContext } from '../../shared/contexts/project-context';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import { useHttpClient } from '../../shared/hooks/http-hook';
+import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner';
+import Modal from '../../shared/components/UIElements/Modal';
+import AlertDialog from '../../shared/components/UIElements/AlertDialog';
+import { IProject } from '../../shared/interfaces/shared-interfaces';
 
 
 interface IFormInputs {
@@ -27,42 +33,66 @@ const useStyles = makeStyles((theme: Theme) =>
 const NewProject = () => {
 
   const classes = useStyles();
-
+  const [open, setOpen] = useState<boolean>(false);
   const { control, handleSubmit, errors, formState } = useForm<IFormInputs>({
     mode: 'onChange'
   })
+  const { sendRequest, error, loading } = useHttpClient();
+  const authContext = useContext(AuthContext);
+  const projectContext = useContext(ProjectContext);
 
-  const [{ loading, error }, execute] = useAxios({
-    method: 'POST'
-  },{manual: true})
+  const handleClose= () => {
+    setOpen(false);
+  };
 
-  const auth = useContext(AuthContext);
+  const history = useHistory();
 
   const projectSubmitHandler = async(data: IFormInputs) => {
     try {
-      await execute({
-        url: 'http://localhost:5000/api/projects',
-        data: {
+      const responseData = await sendRequest(
+        'http://localhost:5000/api/projects',
+        'POST',
+        {
           name: data.name
         },
-        headers: {
-          Authorization: 'Bearer ' + auth.token
+        {
+          Authorization: `Bearer ${authContext.token}`
         }
-      })
-    } catch(err) {
-
-    }
+      )
+      projectContext.allProjects.push(responseData.data.project)
+      console.log(projectContext.allProjects);
+      let storedData;
+      const storageData = localStorage.getItem('userData');
+      if (storageData) {
+        storedData = JSON.parse(storageData);
+      }
+      storedData['projects'] = projectContext.allProjects
+      localStorage.setItem('userData', JSON.stringify(storedData));
+      setOpen(true);
+    } catch(err) {}
   }
 
+  const changeProjectHandler = (project: IProject) => {
+    projectContext.selectProject(project);
+    history.push('/tasks')
+  };
+
+  let errorModal;
   if (error) {
-    return <div>
-      error!
-    </div>
+    console.log(error)
+    errorModal =  (
+        <Modal
+          title={error.name}
+          description={error.message}
+          show={true}
+        />
+    )
   }
 
   return (
     <Container component="main" maxWidth="md">
-      {loading && <CircularProgress />}
+      {loading && <LoadingSpinner isLoading={loading}/>}
+      {errorModal}
       <form className={classes.form} onSubmit={handleSubmit(projectSubmitHandler)}>
         <Controller
           as={
@@ -88,6 +118,17 @@ const NewProject = () => {
           disabled={!formState.isValid}
         >タスク作成</Button>
       </form>
+
+      <AlertDialog
+        show={open}
+        dialogTitle='Created New Project!'
+        contentText='作成したプロジェクトに切り替えますか？'
+        ok={'OK'}
+        ng={'キャンセル'}
+        actionForYes={() => changeProjectHandler(projectContext.allProjects.slice(-1)[0])}
+        actionForNo={() => history.push('/tasks')}
+        closeDialog={handleClose}
+      />
     </Container>
   )
 };

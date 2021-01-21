@@ -4,11 +4,11 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListSubheader from '@material-ui/core/ListSubheader';
-import DashboardIcon from '@material-ui/icons/Dashboard';
+import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
 import CreateIcon from '@material-ui/icons/Create';
 import ListAltIcon from '@material-ui/icons/ListAlt';
-import LayersIcon from '@material-ui/icons/Layers';
 import AssignmentIcon from '@material-ui/icons/Assignment';
+import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import { styled } from '@material-ui/core';
 
 const CustomLink = styled(Link)({
@@ -18,33 +18,35 @@ const CustomLink = styled(Link)({
 
 export const mainListItems = (
   <div>
-    <ListItem button>
-      <ListItemIcon>
-       <DashboardIcon />
-      </ListItemIcon>
-      <ListItemText primary="Dashboard" />
-    </ListItem>
+    <CustomLink to="/projects/new" >
+      <ListItem button>
+        <ListItemIcon>
+        <CreateNewFolderIcon color='primary'/>
+        </ListItemIcon>
+        <ListItemText primary="新規プロジェクト" />
+      </ListItem>
+    </CustomLink>
     <CustomLink to="/tasks/new" >
       <ListItem button>
         <ListItemIcon>
-          <CreateIcon />
+          <CreateIcon color='primary' />
         </ListItemIcon>
-        <ListItemText primary="Create New Task"/>
+        <ListItemText primary="新規タスク"/>
       </ListItem>
     </CustomLink>
     <CustomLink to="/tasks">
       <ListItem button>
         <ListItemIcon>
-          <ListAltIcon />
+          <ListAltIcon color='primary' />
         </ListItemIcon>
-        <ListItemText primary="List All Tasks" />
+        <ListItemText primary="タスク一覧" />
       </ListItem>
     </CustomLink>
     <ListItem button>
       <ListItemIcon>
-        <LayersIcon />
+        <PersonAddIcon color='primary' />
       </ListItemIcon>
-      <ListItemText primary="Integrations" />
+      <ListItemText primary="メンバー招待" />
     </ListItem>
   </div>
 );
