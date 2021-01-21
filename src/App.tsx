@@ -105,17 +105,17 @@ const App = () => {
     <AuthContext.Provider
       value={{
         isLoggedIn: !!token,
-        token: token,
-        userId: userId,
-        projects: allProjects,
-        login: login,
-        logout: logout
+        token,
+        userId,
+        login,
+        logout
       }}
     >
       <ProjectContext.Provider
         value={{
-          selectedProject: selectedProject,
-          selectProject: selectProject
+          selectedProject,
+          selectProject,
+          allProjects
         }}
       >
         <Router>

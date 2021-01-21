@@ -1,5 +1,5 @@
-import React, { useContext } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import React, { useContext, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import clsx from 'clsx';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import {
@@ -27,8 +27,14 @@ const Navigation = () => {
   const authContext = useContext(AuthContext);
   const projectContext = useContext(ProjectContext);
   const classes = navStyles();
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = useState(true);
   const history = useHistory();
+  // const [selectedPrj, setSelectedPrj] = useState<IProject>();
+
+  // useEffect(() => {
+  //   setSelectedPrj(projectContext.selectedProject!)
+  //   console.log(selectedPrj)
+  // }, [projectContext.selectedProject])
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -41,6 +47,8 @@ const Navigation = () => {
     projectContext.selectProject(project)
     history.push('/');
   }
+
+  console.log(projectContext.selectedProject!.name)
 
   return (
     <div className={classes.root}>
@@ -66,10 +74,10 @@ const Navigation = () => {
               style={{'backgroundColor': '#fff'}}
               id="project"
               labelId="project"
-              defaultValue={projectContext.selectedProject?._id}
+              value={projectContext.selectedProject?._id}
             >
               {
-                authContext.projects && authContext.projects.map(p => {
+                projectContext.allProjects && projectContext.allProjects.map(p => {
                   return (
                     <MenuItem
                       onClick={() => changeProject(p)}
@@ -81,17 +89,6 @@ const Navigation = () => {
               }
             </Select>
           </FormControl>
-
-          <Link
-            className={classes.menuItem}
-            style={{
-              color: 'inherit',
-              textDecoration: 'none'
-            }}
-            to='/projects/new'
-            >
-            New Project
-          </Link>
 
           <Button
             color="inherit"

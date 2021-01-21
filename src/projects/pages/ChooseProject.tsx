@@ -12,7 +12,6 @@ import {
   Typography
 } from '@material-ui/core';
 import { IProject } from '../../shared/interfaces/shared-interfaces';
-import { AuthContext } from '../../shared/contexts/auth-context';
 import { ProjectContext } from '../../shared/contexts/project-context';
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -40,7 +39,6 @@ const ChooseProject = () => {
   const [project, setProject] = React.useState<string>();
   const [open, setOpen] = React.useState(false);
 
-  const auth = useContext(AuthContext);
   const projectContext = useContext(ProjectContext);
 
   const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
@@ -56,12 +54,12 @@ const ChooseProject = () => {
   };
 
   const projectSubmitHandler = (pid: string | undefined) => {
-    const selectedProject = auth.projects.find(p => p._id === pid)
+    const selectedProject = projectContext.allProjects.find(p => p._id === pid)
     selectedProject && projectContext.selectProject(selectedProject)
   }
 
   let content;
-  if (auth.projects.length > 0) {
+  if (projectContext.allProjects.length > 0) {
     content = (
       <React.Fragment>
         <FormControl className={classes.formControl}>
@@ -76,7 +74,7 @@ const ChooseProject = () => {
             onChange={handleChange}
           >
             {
-              auth.projects && auth.projects.map((project: IProject) => {
+              projectContext.allProjects && projectContext.allProjects.map((project: IProject) => {
                 return <MenuItem value={project._id}>{project.name}</MenuItem>
               })
             }
