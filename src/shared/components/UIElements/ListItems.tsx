@@ -42,12 +42,14 @@ export const mainListItems = (
         <ListItemText primary="タスク一覧" />
       </ListItem>
     </CustomLink>
-    <ListItem button>
-      <ListItemIcon>
-        <PersonAddIcon color='primary' />
-      </ListItemIcon>
-      <ListItemText primary="メンバー招待" />
-    </ListItem>
+    <CustomLink to="/projects/invite">
+      <ListItem button>
+        <ListItemIcon>
+          <PersonAddIcon color='primary' />
+        </ListItemIcon>
+        <ListItemText primary="メンバー招待" />
+      </ListItem>
+    </CustomLink>
   </div>
 );
 
