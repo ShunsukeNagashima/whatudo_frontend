@@ -1,5 +1,5 @@
-import React, {useState, useContext} from 'react';
-import { useHistory } from 'react-router-dom';
+import React, {useState, useContext, useEffect} from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import {
   Avatar,
@@ -12,10 +12,9 @@ import {
 } from '@material-ui/core';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import { makeStyles } from '@material-ui/core/styles';
-import useAxios from 'axios-hooks';
+import { useHttpClient } from '../../shared/hooks/http-hook';
 import { AuthContext } from '../../shared/contexts/auth-context';
-import { AxiosResponse } from 'axios';
-import { IProject } from '../../shared/interfaces/shared-interfaces';
+import { ProjectContext } from '../../shared/contexts/project-context';
 import Modal from '../../shared/components/UIElements/Modal';
 import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner';
 
@@ -46,21 +45,24 @@ interface IFormInputs {
   password: string
 }
 
-interface AuthApiResponse {
-  userId: string,
-  projects: IProject[],
-  access_token: string
-}
-
 const Auth = () => {
   const classes = useStyles();
+  const { sendRequest, loading, error } = useHttpClient();
   const [isLoginMode, setIsLoginMode] = useState(true);
+  const [inviteToken, setInviteToken] = useState<string>()
+  const authContext = useContext(AuthContext);
+  const projectContext = useContext(ProjectContext);
 
-  const auth = useContext(AuthContext);
+  const history = useHistory();
+  const location = useLocation();
 
-  const [{ loading, error }, execute ] = useAxios({
-    method: 'POST',
-  },{ manual: true })
+  useEffect(() => {
+    if (location.search !== '') {
+      const token = location.search.split('=')[1]
+      setInviteToken(token);
+    }
+  }, [location.search])
+
 
   const switchModeHandler = () => {
     setIsLoginMode(prevState => !prevState);
@@ -70,38 +72,63 @@ const Auth = () => {
     mode: 'onChange'
   });
 
-  const history = useHistory();
-
   const authSubmitHandler = async (data: IFormInputs, event: any) => {
     event.preventDefault();
     if (isLoginMode) {
       try {
-        const responseData: AxiosResponse<AuthApiResponse> = await execute({
-          url: 'http://localhost:5000/api/auth/login',
-          data: JSON.stringify({
+        let url = 'http://localhost:5000/api/auth/login'
+        if (inviteToken) {
+          url = `${url}?token=${inviteToken}`
+        }
+        const responseData = await sendRequest(
+          url,
+          'POST',
+          JSON.stringify({
             email: data.email,
             password: data.password
           }),
-          headers: {
+          {
             'Content-Type': 'application/json'
           }
-        });
-        auth.login(responseData.data.userId, responseData.data.access_token, responseData.data.projects)
-        history.push('/projects/')
+        );
+        authContext.login(
+          responseData.data.userObj.userId,
+          responseData.data.userObj.access_token,
+          responseData.data.userObj.projects
+        )
+        if (inviteToken) {
+          projectContext.selectProject(responseData.data.userObj.project)
+          history.push('/tasks', { message: responseData.data.message })
+        }
+        history.push('/projects/', { message: responseData.data.message })
       } catch(err) {
         console.log(err);
       }
     } else {
       try {
-        const responseData: AxiosResponse<AuthApiResponse> = await execute({
-          url: 'http://localhost:5000/api/users/signup',
-          data: {
+        let url = 'http://localhost:5000/api/users/signup'
+        if (inviteToken) {
+          url = `${url}?token=${inviteToken}`
+        }
+        const responseData = await sendRequest(
+          url,
+          'POST',
+          {
             name: data.userName,
             email: data.email,
             password: data.password
           }
-        });
-        auth.login(responseData.data.userId, responseData.data.access_token, responseData.data.projects)
+        );
+        authContext.login(
+          responseData.data.userObj.userId,
+          responseData.data.userObj.access_token,
+          responseData.data.userObj.projects
+        )
+        if (inviteToken) {
+          projectContext.selectProject(responseData.data.userObj.project)
+          history.push('/tasks', { message: responseData.data.message })
+        }
+        history.push('/projects/', { message: responseData.data.message })
       } catch(err) {
         console.log(err);
       };
@@ -110,11 +137,11 @@ const Auth = () => {
 
   let errorModal;
   if (error) {
-    console.log(error.response)
+    console.log(error)
     errorModal =  (
         <Modal
           title={error.name}
-          description={error.response?.data.message}
+          description={error.message}
           show={true}
         />
     )
@@ -207,13 +234,7 @@ const Auth = () => {
             {isLoginMode? "Sign In": "Sign Up"}
           </Button>
           <Grid container>
-            <Grid item xs>
-              {isLoginMode &&
-              <Link href="#" variant="body2">
-                Forgot password?
-              </Link>
-              }
-            </Grid>
+
             <Grid item>
               <Link variant="body2" onClick={switchModeHandler}>
                 {!isLoginMode ? "Already have an account? Sign in": "Don't have an account? Sign Up"}

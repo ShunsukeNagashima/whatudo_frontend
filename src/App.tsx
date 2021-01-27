@@ -11,6 +11,7 @@ import Dashboard from './user/pages/Dashboard';
 import Header from './shared/components/UIElements/Header';
 import ChooseProject from './projects/pages/ChooseProject';
 import UpdateTask from './tasks/pages/UpdateTask';
+import InviteUser from './projects/pages/InviteUser';
 import { AuthContext } from './shared/contexts/auth-context';
 import { useAuth } from './shared/hooks/auth-hook';
 import { ProjectContext } from './shared/contexts/project-context';
@@ -52,7 +53,10 @@ const App = () => {
         <Route path='/projects/new'>
           <NewProject />
         </Route>
-        <Redirect to='/dashboard' />
+        <Route path='/projects/invite'>
+          <InviteUser />
+        </Route>
+        <Redirect to='/tasks' />
       </Switch>
     )
     contents = (
@@ -85,6 +89,9 @@ const App = () => {
   } else {
     routes = (
       <Switch>
+        <Route path='/projects/addUser/'>
+          <Auth />
+        </Route>
         <Route path='/' exact>
         </Route>
         <Route path='/auth'>

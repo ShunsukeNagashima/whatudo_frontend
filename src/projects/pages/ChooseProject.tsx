@@ -1,5 +1,5 @@
-import React, { useContext } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import React, { useContext, useState, useEffect } from 'react';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import {
   InputLabel,
@@ -13,6 +13,7 @@ import {
 } from '@material-ui/core';
 import { IProject } from '../../shared/interfaces/shared-interfaces';
 import { ProjectContext } from '../../shared/contexts/project-context';
+import SnackBar from '../../shared/components/UIElements/SnackBar';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -33,11 +34,26 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
+interface stateType {
+  message: string
+}
+
 const ChooseProject = () => {
 
   const classes = useStyles();
   const [project, setProject] = React.useState<string>();
   const [open, setOpen] = React.useState(false);
+  const [message, setMessage] = useState<string>('');
+  const [showSnackBar, setShowSnackBar] = useState<boolean>(false);
+
+  const { state } = useLocation<stateType>();
+
+  useEffect(() => {
+    if (state) {
+      setMessage(state.message);
+      setShowSnackBar(true)
+    }
+  }, [state])
 
   const projectContext = useContext(ProjectContext);
 
@@ -52,6 +68,10 @@ const ChooseProject = () => {
   const handleOpen = () => {
     setOpen(true);
   };
+
+  const closeSnackBar = () => {
+    setShowSnackBar(false);
+  }
 
   const projectSubmitHandler = (pid: string | undefined) => {
     const selectedProject = projectContext.allProjects.find(p => p._id === pid)
@@ -85,7 +105,7 @@ const ChooseProject = () => {
           color="primary"
           disabled={!project}
           onClick={() => projectSubmitHandler(project)}>
-          Sign In With This Project
+          Select
         </Button>
       </React.Fragment>
     )
@@ -106,10 +126,16 @@ const ChooseProject = () => {
     <Container component="main" maxWidth="sm" className={classes.root}>
       <Paper className={classes.paper}>
           <Typography variant="h4">
-            ログインするプロジェクト
+            プロジェクト選択
           </Typography>
           {content}
       </Paper>
+
+      <SnackBar
+        open={showSnackBar}
+        close={closeSnackBar}
+        message={message}
+      />
     </Container>
   );
 };
