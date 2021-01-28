@@ -47,7 +47,7 @@ interface IFormInputs {
 
 const Auth = () => {
   const classes = useStyles();
-  const { sendRequest, loading, error } = useHttpClient();
+  const { sendRequest, loading, error, clearError } = useHttpClient();
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [inviteToken, setInviteToken] = useState<string>()
   const authContext = useContext(AuthContext);
@@ -102,7 +102,7 @@ const Auth = () => {
         }
         history.push('/projects/', { message: responseData.data.message })
       } catch(err) {
-        console.log(err);
+        console.log(err.response);
       }
     } else {
       try {
@@ -136,13 +136,13 @@ const Auth = () => {
   };
 
   let errorModal;
-  if (error) {
-    console.log(error)
+  if (error?.response) {
     errorModal =  (
         <Modal
-          title={error.name}
-          description={error.message}
-          show={true}
+          title={error.response?.statusText}
+          description={error.response?.data.message}
+          show={!!error}
+          closeModal={clearError}
         />
     )
   }

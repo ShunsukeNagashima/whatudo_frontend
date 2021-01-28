@@ -23,6 +23,7 @@ import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner'
 import { formStyles, PrettoSlider } from '../../assets/formStyles';
 import { IFormInputs } from '../../shared/interfaces/shared-interfaces';
 import { useHttpClient } from '../../shared/hooks/http-hook';
+import Modal from '../../shared/components/UIElements/Modal';
 
 const NewTask  = () => {
 
@@ -31,7 +32,7 @@ const NewTask  = () => {
   const projectContext = useContext(ProjectContext);
   const [fetchedUsers, setFetchedUsers] = useState<any[]>([]);
   const [fetchedCategories, setFetchedCategories] = useState<any[]>([])
-  const { sendRequest, loading, error } = useHttpClient();
+  const { sendRequest, loading, error, clearError } = useHttpClient();
 
   const { control, handleSubmit, errors, formState} = useForm<IFormInputs>({
     mode: 'onChange'
@@ -74,9 +75,8 @@ const NewTask  = () => {
   const history = useHistory();
 
   const taskSubmitHandler = async (data: IFormInputs) => {
-    let responseData: any
     try {
-      responseData = await sendRequest(
+      const responseData = await sendRequest(
         'http://localhost:5000/api/tasks',
         'POST',
         {
@@ -93,20 +93,25 @@ const NewTask  = () => {
             Authorization: `Bearer ${authContext.token}`
         }
       )
+      history.push('/tasks', { message: responseData.data.message})
     } catch(err) {}
-    history.push('/tasks', { message: responseData.data.message})
 };
 
-  if (error) {
-    return (
-      <div>
-
-      </div>
+  let errorModal;
+  if (error?.response) {
+    errorModal =  (
+        <Modal
+          title={error.response?.statusText}
+          description={error.response?.data.message}
+          show={!!error}
+          closeModal={clearError}
+        />
     )
   }
 
   return (
     <Container component="main" maxWidth="md">
+      { errorModal }
       <LoadingSpinner isLoading={loading} />
       <form className={classes.form} onSubmit={handleSubmit(taskSubmitHandler)}>
         <FormControl className={classes.formControl}>

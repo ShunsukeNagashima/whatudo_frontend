@@ -14,6 +14,7 @@ import {
 } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AlertDialog from '../../shared/components/UIElements/AlertDialog';
+import Modal from '../../shared/components/UIElements/Modal'
 
 interface ITask {
   _id: string,
@@ -59,7 +60,7 @@ const TaskList = () => {
   const [message, setMessage] = useState<string>('');
   const [showSnackBar, setShowSnackBar] = useState<boolean>(false);
   const [showDialog, setShowDialog] = useState<boolean>(false);
-  const { sendRequest, loading, error } = useHttpClient();
+  const { sendRequest, loading, error, clearError } = useHttpClient();
   const { state } = useLocation<stateType>()
   const classes = useStyles();
 
@@ -149,8 +150,6 @@ const TaskList = () => {
               actionForYes={() => deleteTaskHandler(param.getValue('objId')!.toString())}
               closeDialog={closeDialog}
             />
-
-
           </Container>
         )
       }
@@ -172,16 +171,21 @@ const TaskList = () => {
     })
   })
 
-  if (error) {
-    return (
-      <div>
-        Error!
-      </div>
+  let errorModal;
+  if (error?.response) {
+    errorModal =  (
+        <Modal
+          title={error.response?.statusText}
+          description={error.response?.data.message}
+          show={!!error}
+          closeModal={clearError}
+        />
     )
   }
 
   return (
     <React.Fragment>
+      {errorModal}
       <LoadingSpinner isLoading={loading}/>
       <div style={{ height: '85vh', width: '100%'}}>
         <DataGrid

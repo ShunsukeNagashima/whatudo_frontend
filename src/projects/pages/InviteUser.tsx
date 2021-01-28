@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
 
 const InviteUser = () => {
 
-  const { loading, error, sendRequest } = useHttpClient();
+  const { loading, error, sendRequest, clearError } = useHttpClient();
   const [ inviteLink, setInviteLink ] = useState<string>('');
   const authContext = useContext(AuthContext);
   const projectContext = useContext(ProjectContext);
@@ -50,13 +50,13 @@ const InviteUser = () => {
   }
 
   let errorModal;
-  if (error) {
-    console.log(error)
+  if (error?.response) {
     errorModal =  (
         <Modal
-          title={error.name}
-          description={error.message}
-          show={true}
+          title={error.response?.statusText}
+          description={error.response?.data.message}
+          show={!!error}
+          closeModal={clearError}
         />
     )
   }

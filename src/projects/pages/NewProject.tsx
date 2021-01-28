@@ -37,7 +37,7 @@ const NewProject = () => {
   const { control, handleSubmit, errors, formState } = useForm<IFormInputs>({
     mode: 'onChange'
   })
-  const { sendRequest, error, loading } = useHttpClient();
+  const { sendRequest, error, loading, clearError } = useHttpClient();
   const authContext = useContext(AuthContext);
   const projectContext = useContext(ProjectContext);
 
@@ -84,7 +84,8 @@ const NewProject = () => {
         <Modal
           title={error.name}
           description={error.message}
-          show={true}
+          show={!!!error}
+          closeModal={clearError}
         />
     )
   }

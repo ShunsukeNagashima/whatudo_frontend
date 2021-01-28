@@ -25,6 +25,7 @@ import { formStyles, PrettoSlider } from '../../assets/formStyles';
 import { IFormInputs } from '../../shared/interfaces/shared-interfaces';
 import CommentList from '../components/CommentList'
 import Snackbar from '../../shared/components/UIElements/SnackBar'
+import Modal from '../../shared/components/UIElements/Modal';
 
 
 interface IParams {
@@ -39,7 +40,7 @@ const UpdateTask = () => {
   const [ showCommentInput, setShowCommentInput ] = useState<boolean>(false);
   const [ message, setMessage ] = useState<string>('');
   const [ showSnackBar, setShowSnackBar ] = useState<boolean>(false);
-  const { loading, error, sendRequest } = useHttpClient();
+  const { loading, error, sendRequest, clearError } = useHttpClient();
   const authContext = useContext(AuthContext);
   const projectContext = useContext(ProjectContext);
   const { handleSubmit, control, errors, formState } = useForm<IFormInputs>({
@@ -149,11 +150,15 @@ const UpdateTask = () => {
     setShowCommentInput(prevSate => !prevSate)
   };
 
+  let errorModal;
   if (error) {
-    return (
-      <div>
-        Error!
-      </div>
+    errorModal =  (
+        <Modal
+          title={error.name}
+          description={error.message}
+          show={!!!error}
+          closeModal={clearError}
+        />
     )
   }
 
@@ -169,6 +174,8 @@ const UpdateTask = () => {
     <Container className={classes.form} component="main" maxWidth="md">
       {!loading && loadedTask! && (
         <React.Fragment>
+          {errorModal}
+          {loading && <LoadingSpinner isLoading={loading}/>}
           <form id='taskForm' className={classes.form} onSubmit={handleSubmit(taskSubmitHandler)}>
             <FormControl className={classes.formControl}>
               <InputLabel id="category">カテゴリ(必須)</InputLabel>

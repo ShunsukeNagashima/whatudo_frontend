@@ -1,12 +1,11 @@
 import { useState, useCallback, useEffect } from 'react';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 export const useHttpClient = () => {
   const [loading, setLoading] = useState<boolean>(false)
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<AxiosError | null>(null);
 
   const signal = axios.CancelToken.source();
-
   useEffect(() => {
     return () => {
       signal.cancel("Api is being canceled")
@@ -34,8 +33,8 @@ export const useHttpClient = () => {
         setLoading(false);
         return responseData
       } catch(err) {
-        console.log(err);
-        setError(err.message);
+        console.log(err.response)
+        setError(err);
         setLoading(false);
         throw err
       }
