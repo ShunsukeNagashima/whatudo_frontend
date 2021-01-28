@@ -29,18 +29,15 @@ const useStyles = makeStyles((theme: Theme) =>
 interface ModalProps {
   title: string,
   description: string,
-  show: boolean
+  show: boolean,
+  closeModal: any
 }
 
 const SimpleModal = (props: ModalProps) => {
   const classes = useStyles();
   // getModalStyle is not a pure function, we roll the style only on the first render
   const [modalStyle] = React.useState(getModalStyle);
-  const [open, setOpen] = React.useState(props.show);
 
-  const handleClose = () => {
-    setOpen(false);
-  };
 
   const body = (
     <div style={modalStyle} className={classes.paper}>
@@ -53,8 +50,8 @@ const SimpleModal = (props: ModalProps) => {
 
   return (
       <Modal
-        open={open}
-        onClose={handleClose}
+        open={props.show}
+        onClose={props.closeModal}
         aria-labelledby="simple-modal-title"
         aria-describedby="simple-modal-description"
       >
