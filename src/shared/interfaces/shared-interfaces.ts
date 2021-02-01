@@ -1,6 +1,10 @@
 export interface IProject {
   _id: string,
-  name: string
+  name: string,
+  users: {
+    _id: string,
+    name: string
+  }[]
 }
 
 export interface IComment {

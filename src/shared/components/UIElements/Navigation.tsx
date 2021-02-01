@@ -29,12 +29,6 @@ const Navigation = () => {
   const classes = navStyles();
   const [open, setOpen] = useState(true);
   const history = useHistory();
-  // const [selectedPrj, setSelectedPrj] = useState<IProject>();
-
-  // useEffect(() => {
-  //   setSelectedPrj(projectContext.selectedProject!)
-  //   console.log(selectedPrj)
-  // }, [projectContext.selectedProject])
 
   const handleDrawerOpen = () => {
     setOpen(true);
