@@ -151,12 +151,12 @@ const UpdateTask = () => {
   };
 
   let errorModal;
-  if (error) {
+  if (error?.response) {
     errorModal =  (
         <Modal
-          title={error.name}
-          description={error.message}
-          show={!!!error}
+          title={error.response?.statusText}
+          description={error.response?.data.message}
+          show={!!error}
           closeModal={clearError}
         />
     )

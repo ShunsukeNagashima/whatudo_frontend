@@ -78,13 +78,12 @@ const NewProject = () => {
   };
 
   let errorModal;
-  if (error) {
-    console.log(error)
+  if (error?.response) {
     errorModal =  (
         <Modal
-          title={error.name}
-          description={error.message}
-          show={!!!error}
+          title={error.response?.statusText}
+          description={error.response?.data.message}
+          show={!!error}
           closeModal={clearError}
         />
     )

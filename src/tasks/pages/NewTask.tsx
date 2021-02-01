@@ -30,30 +30,12 @@ const NewTask  = () => {
   const classes = formStyles();
   const authContext = useContext(AuthContext);
   const projectContext = useContext(ProjectContext);
-  const [fetchedUsers, setFetchedUsers] = useState<any[]>([]);
   const [fetchedCategories, setFetchedCategories] = useState<any[]>([])
   const { sendRequest, loading, error, clearError } = useHttpClient();
 
   const { control, handleSubmit, errors, formState} = useForm<IFormInputs>({
     mode: 'onChange'
   });
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const responseData = await sendRequest(
-          `http://localhost:5000/api/users/${projectContext.selectedProject!._id}`,
-          'GET',
-          null,
-          {
-            Authorization: `Bearer ${authContext.token}`
-          }
-        )
-        setFetchedUsers(responseData.data)
-      } catch(err) {}
-    }
-    fetchUsers()
-  }, [])
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -221,8 +203,8 @@ const NewTask  = () => {
                 <MenuItem value="">
                   <em>未定</em>
                 </MenuItem>
-                { fetchedUsers && fetchedUsers.map(u => {
-                   return <MenuItem value={u.id}>{u.name}</MenuItem>
+                { projectContext.selectedProject!.users && projectContext.selectedProject!.users.map(u => {
+                   return <MenuItem value={u._id}>{u.name}</MenuItem>
                 })}
               </Select>
             }
