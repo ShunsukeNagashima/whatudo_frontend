@@ -17,6 +17,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+    marginTop: theme.spacing(4)
   },
   linkField: {
     width: '90%'
@@ -70,7 +71,7 @@ const InviteUser = () => {
       </Typography>
       <Typography component='h5' variant='h6' color='textSecondary' className={classes.marginTop}>
         「招待リンク」ボタンをクリックして、生成されたURLを招待するメンバーに送信してください。<br/>
-        リンクの有効期限は10分です。
+        リンクの有効期限は30分です。
       </Typography>
       {!loading && inviteLink &&
       <TextField

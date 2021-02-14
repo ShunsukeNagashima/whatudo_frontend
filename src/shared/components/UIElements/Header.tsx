@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { useHistory } from 'react-router-dom';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import { Typography, Button, Toolbar, AppBar } from '@material-ui/core';
+import { Link, Button, Toolbar, AppBar } from '@material-ui/core';
+import { AuthContext } from '../../contexts/auth-context';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -11,26 +13,49 @@ const useStyles = makeStyles((theme: Theme) =>
       marginRight: theme.spacing(2),
     },
     title: {
-      flexGrow: 1,
+      fontSize: '1.5em'
     },
+    flexGlow: {
+      flexGrow: 1,
+    }
   }),
 );
 
 const Header = () => {
   const classes = useStyles();
+  const authContext = useContext(AuthContext)
+  const history = useHistory();
+
   return (
     <div className={classes.root}>
       <AppBar position="static">
         <Toolbar>
-          <Typography variant="h6" className={classes.title}>
-            WhatUDo
-          </Typography>
-          <Button
+          <Link
+            underline="none"
             color="inherit"
-            href='/auth'
-            >
-            Authorization
-          </Button>
+            href="/"
+            className={classes.title}>
+            WhatUDo
+          </Link>
+          <div className={classes.flexGlow} />
+          { authContext.isLoggedIn && (
+            <Button
+              variant="outlined"
+              color="inherit"
+              onClick={authContext.logout}
+              >
+              Logout
+            </Button>
+          )}
+          { !authContext.isLoggedIn && (
+            <Button
+              variant="outlined"
+              color="inherit"
+              onClick={() => history.push('/auth', {loginMode: true})}
+              >
+              Login
+            </Button>
+          )}
         </Toolbar>
       </AppBar>
     </div>

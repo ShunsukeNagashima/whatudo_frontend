@@ -45,16 +45,25 @@ interface IFormInputs {
   password: string
 }
 
-const Auth = () => {
+interface AuthProps {
+  loginMode: boolean
+}
+
+interface stateType {
+  loginMode: boolean
+}
+
+const Auth = (props: AuthProps) => {
   const classes = useStyles();
   const { sendRequest, loading, error, clearError } = useHttpClient();
-  const [isLoginMode, setIsLoginMode] = useState(true);
+  const [isLoginMode, setIsLoginMode] = useState(props.loginMode);
   const [inviteToken, setInviteToken] = useState<string>()
   const authContext = useContext(AuthContext);
   const projectContext = useContext(ProjectContext);
 
   const history = useHistory();
   const location = useLocation();
+  const { state } = useLocation<stateType>()
 
   useEffect(() => {
     if (location.search !== '') {
@@ -63,6 +72,11 @@ const Auth = () => {
     }
   }, [location.search])
 
+  useEffect(() => {
+    if (state) {
+      setIsLoginMode(state.loginMode)
+    }
+  }, [state])
 
   const switchModeHandler = () => {
     setIsLoginMode(prevState => !prevState);
@@ -236,8 +250,8 @@ const Auth = () => {
           <Grid container>
 
             <Grid item>
-              <Link variant="body2" onClick={switchModeHandler}>
-                {!isLoginMode ? "Already have an account? Sign in": "Don't have an account? Sign Up"}
+              <Link style={{ cursor: 'pointer'}} variant="body2" onClick={switchModeHandler}>
+                {!isLoginMode ? "アカウントをお持ちですか？ログイン": "今すぐサインアップ"}
               </Link>
             </Grid>
           </Grid>

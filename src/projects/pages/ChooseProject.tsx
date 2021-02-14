@@ -18,7 +18,8 @@ import SnackBar from '../../shared/components/UIElements/SnackBar';
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      marginTop: theme.spacing(5)
+      marginTop: theme.spacing(5),
+      height: '88vh'
     },
     formControl: {
       minWidth: 300,
