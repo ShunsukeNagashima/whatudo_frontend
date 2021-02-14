@@ -22,7 +22,10 @@ export const formStyles = makeStyles((theme: Theme) =>
     submit: {
       margin: theme.spacing(3, 0, 2),
       alignSelf: 'center',
-      minWidth: 200
+      minWidth: 200,
+      [theme.breakpoints.down('xs')]: {
+        minWidth: 100
+      }
     },
     paper: {
       display: 'flex',
@@ -47,7 +50,7 @@ export const formStyles = makeStyles((theme: Theme) =>
     },
     commentButtons: {
       display: 'flex',
-      justifyContent: 'center'
+      justifyContent: 'space-around'
     }
   }),
 );

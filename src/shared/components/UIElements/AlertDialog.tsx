@@ -1,4 +1,5 @@
 import React from 'react';
+import { withRouter, RouteComponentProps, useHistory } from 'react-router-dom';
 import {
   Button,
   Dialog,
@@ -8,7 +9,7 @@ import {
   DialogContentText
 } from '@material-ui/core'
 
-interface DialogProps {
+interface DialogProps extends RouteComponentProps {
   show: boolean,
   dialogTitle: string,
   contentText: string,
@@ -17,12 +18,16 @@ interface DialogProps {
   actionForYes?: Function,
   actionForNo?: Function
   closeDialog: any
+  redirectTo?: string
 }
 
 const AlertDialog = (props: DialogProps) => {
 
+  const history = useHistory()
+
   const actionForYes = (action?: Function) => {
     action && action()
+    props.redirectTo && history.push(props.redirectTo)
     props.closeDialog()
   }
 
@@ -57,4 +62,4 @@ const AlertDialog = (props: DialogProps) => {
   );
 }
 
-export default AlertDialog
+export default withRouter(AlertDialog)

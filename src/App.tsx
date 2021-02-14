@@ -3,6 +3,7 @@ import {BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-do
 import { makeStyles } from '@material-ui/core/styles'
 import NewTask from './tasks/pages/NewTask';
 import Auth from './user/pages/Auth';
+import TopPage from './user/pages/TopPage';
 import TaskList from './tasks/pages/TaskList'
 import NewProject from './projects/pages/NewProject';
 import MainContent from './shared/components/UIElements/MainContent';
@@ -16,15 +17,37 @@ import { AuthContext } from './shared/contexts/auth-context';
 import { useAuth } from './shared/hooks/auth-hook';
 import { ProjectContext } from './shared/contexts/project-context';
 import AlertDialog from './shared/components/UIElements/AlertDialog'
+import Typography from '@material-ui/core/Typography'
+import Box from '@material-ui/core/Box'
+import { drawerWidth } from './shared/components/UIElements/Navigation';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   root: {
-    display: 'flex'
-  },
-  column: {
+    display: 'flex',
     flexDirection: 'column'
-  }
+  },
+  copyRight: {
+    width: '100%',
+    alignSelf: 'center',
+    padding: theme.spacing(2)
+  },
+  marginLeft: {
+    [theme.breakpoints.up('md')]: {
+      marginLeft: drawerWidth
+    }
+  },
 }))
+
+export const Copyright = () => {
+  return (
+      <Typography variant="body2" color="textSecondary" align="center">
+        {'Copyright © Shunsuke Nagashima'}
+        {new Date().getFullYear()}
+        {'.'}
+      </Typography>
+
+  );
+}
 
 const App = () => {
 
@@ -63,6 +86,9 @@ const App = () => {
       <div className={classes.root}>
         <Navigation />
         <MainContent content={routes} />
+        <Box pt={4} className={`${classes.copyRight} ${classes.marginLeft}`}>
+          <Copyright />
+        </Box>
       </div>
     )
   } else if (token) {
@@ -72,36 +98,37 @@ const App = () => {
           <NewProject />
         </Route>
         <Route path='/projects'>
-           <ChooseProject />
+          <ChooseProject />
          </Route>
-         <Route path='/auth'>
-          <Auth />
-        </Route>
          <Redirect to='/projects' />
       </Switch>
     )
     contents = (
-      <div className={`${classes.root} ${classes.column}`}>
+      <div className={classes.root}>
         <Header />
         {routes}
+        <Box pt={4} className={classes.copyRight}>
+          <Copyright />
+        </Box>
       </div>
     )
   } else {
     routes = (
       <Switch>
         <Route path='/projects/addUser/'>
-          <Auth />
+          <Auth loginMode={true}/>
         </Route>
         <Route path='/' exact>
+          <TopPage />
         </Route>
         <Route path='/auth'>
-          <Auth />
+          <Auth loginMode={true}/>
         </Route>
         <Redirect to='/' />
       </Switch>
     )
     contents = (
-      <div className={`${classes.root} ${classes.column}`}>
+      <div className={classes.root}>
         <Header />
         {routes}
       </div>
@@ -127,15 +154,17 @@ const App = () => {
       >
         <Router>
           { contents}
+
+          <AlertDialog
+            show={open}
+            dialogTitle={'セッションタイムアウト'}
+            contentText={'セッションが切れました。再度ログインしてください。'}
+            ok={'ログイン画面へ'}
+            closeDialog={closeConfimation}
+            actionForYes={logout}
+            redirectTo='/auth'
+          />
         </Router>
-        <AlertDialog
-          show={open}
-          dialogTitle={'セッションタイムアウト'}
-          contentText={'セッションが切れました。再度ログインしてください。'}
-          ok={'ログイン画面へ'}
-          closeDialog={closeConfimation}
-          actionForYes={logout}
-        />
 
       </ProjectContext.Provider>
 

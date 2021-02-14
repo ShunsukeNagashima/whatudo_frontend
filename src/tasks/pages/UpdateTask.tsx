@@ -175,7 +175,7 @@ const UpdateTask = () => {
       {!loading && loadedTask! && (
         <React.Fragment>
           {errorModal}
-          {loading && <LoadingSpinner isLoading={loading}/>}
+          {loading && <LoadingSpinner isLoading={!loadedTask}/>}
           <form id='taskForm' className={classes.form} onSubmit={handleSubmit(taskSubmitHandler)}>
             <FormControl className={classes.formControl}>
               <InputLabel id="category">カテゴリ(必須)</InputLabel>
@@ -240,6 +240,7 @@ const UpdateTask = () => {
                 control={control}
                 render={({ref, ...rest}) => (
                   <KeyboardDatePicker
+                    autoOk
                     disableToolbar
                     variant='inline'
                     format='yyyy/MM/dd'
@@ -250,6 +251,7 @@ const UpdateTask = () => {
                       'aria-label': 'change date'
                     }}
                     className={classes.formControl}
+                    style={{width: '140px'}}
                     {...rest}
                   />
                 )}

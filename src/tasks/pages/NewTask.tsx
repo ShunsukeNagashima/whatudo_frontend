@@ -32,6 +32,7 @@ const NewTask  = () => {
   const projectContext = useContext(ProjectContext);
   const [fetchedCategories, setFetchedCategories] = useState<any[]>([])
   const { sendRequest, loading, error, clearError } = useHttpClient();
+  // const [openDatePicker, setOpenDatePicker] = useState<boolean>(false);
 
   const { control, handleSubmit, errors, formState} = useForm<IFormInputs>({
     mode: 'onChange'
@@ -103,6 +104,7 @@ const NewTask  = () => {
               <Select
                 id="category"
                 labelId="category"
+                style={{width: '130px'}}
               >
                 {
                   fetchedCategories && fetchedCategories.map(c => {
@@ -156,6 +158,7 @@ const NewTask  = () => {
                 control={control}
                 render={({ref, ...rest}) => (
                   <KeyboardDatePicker
+                    autoOk
                     disableToolbar
                     variant='inline'
                     format='yyyy-MM-dd'
@@ -166,6 +169,7 @@ const NewTask  = () => {
                       'aria-label': 'change date',
                     }}
                     className={classes.formControl}
+                    style={{width: '140px'}}
                     {...rest}
                  />
                 )}
