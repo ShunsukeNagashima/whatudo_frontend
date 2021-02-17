@@ -1,31 +1,36 @@
-import { createStyles, makeStyles, Theme, withStyles } from '@material-ui/core/styles';
-import { Slider } from '@material-ui/core';
+import {
+  createStyles,
+  makeStyles,
+  Theme,
+  withStyles,
+} from '@material-ui/core/styles'
+import { Slider } from '@material-ui/core'
 
 export const formStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
     },
     form: {
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
     },
     formControl: {
       margin: theme.spacing(1),
       minWidth: 120,
-      alignSelf: 'start'
+      alignSelf: 'start',
     },
     margin_top: {
-      marginTop: 20
+      marginTop: 20,
     },
     submit: {
       margin: theme.spacing(3, 0, 2),
       alignSelf: 'center',
       minWidth: 200,
       [theme.breakpoints.down('xs')]: {
-        minWidth: 100
-      }
+        minWidth: 100,
+      },
     },
     paper: {
       display: 'flex',
@@ -35,25 +40,25 @@ export const formStyles = makeStyles((theme: Theme) =>
       marginTop: theme.spacing(3),
     },
     avatar: {
-      marginLeft: theme.spacing(2)
+      marginLeft: theme.spacing(2),
     },
     comment: {
       marginLeft: theme.spacing(2),
-      flexBasis: '80%'
+      flexBasis: '80%',
     },
     commentForm: {
       margin: '0 auto',
       display: 'flex',
       flexDirection: 'column',
       width: '90%',
-      padding: theme.spacing(1, 0)
+      padding: theme.spacing(1, 0),
     },
     commentButtons: {
       display: 'flex',
-      justifyContent: 'space-around'
-    }
+      justifyContent: 'space-around',
+    },
   }),
-);
+)
 
 export const PrettoSlider = withStyles({
   root: {
@@ -82,5 +87,5 @@ export const PrettoSlider = withStyles({
   rail: {
     height: 8,
     borderRadius: 4,
-  }
-})(Slider);
+  },
+})(Slider)

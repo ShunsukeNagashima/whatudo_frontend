@@ -1,59 +1,71 @@
-import React from 'react';
-import {BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
+import React, { Suspense } from 'react'
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch,
+  Redirect,
+} from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles'
-import NewTask from './tasks/pages/NewTask';
-import Auth from './user/pages/Auth';
-import TopPage from './user/pages/TopPage';
-import TaskList from './tasks/pages/TaskList'
-import NewProject from './projects/pages/NewProject';
-import MainContent from './shared/components/UIElements/MainContent';
-import Navigation from './shared/components/UIElements/Navigation';
-import Dashboard from './user/pages/Dashboard';
-import Header from './shared/components/UIElements/Header';
-import ChooseProject from './projects/pages/ChooseProject';
-import UpdateTask from './tasks/pages/UpdateTask';
-import InviteUser from './projects/pages/InviteUser';
-import { AuthContext } from './shared/contexts/auth-context';
-import { useAuth } from './shared/hooks/auth-hook';
-import { ProjectContext } from './shared/contexts/project-context';
+import { Box, Typography } from '@material-ui/core'
+import LoadingSpinner from './shared/components/UIElements/LoadingSpinner'
+import MainContent from './shared/components/UIElements/MainContent'
+import Navigation from './shared/components/UIElements/Navigation'
+import Header from './shared/components/UIElements/Header'
 import AlertDialog from './shared/components/UIElements/AlertDialog'
-import Typography from '@material-ui/core/Typography'
-import Box from '@material-ui/core/Box'
-import { drawerWidth } from './shared/components/UIElements/Navigation';
+import { AuthContext } from './shared/contexts/auth-context'
+import { useAuth } from './shared/hooks/auth-hook'
+import { ProjectContext } from './shared/contexts/project-context'
+import { drawerWidth } from './shared/components/UIElements/Navigation'
+const NewTask = React.lazy(() => import('./tasks/pages/NewTask'))
+const Auth = React.lazy(() => import('./user/pages/Auth'))
+const TopPage = React.lazy(() => import('./user/pages/TopPage'))
+const TaskList = React.lazy(() => import('./tasks/pages/TaskList'))
+const NewProject = React.lazy(() => import('./projects/pages/NewProject'))
+const ChooseProject = React.lazy(() => import('./projects/pages/ChooseProject'))
+const UpdateTask = React.lazy(() => import('./tasks/pages/UpdateTask'))
+const InviteUser = React.lazy(() => import('./projects/pages/InviteUser'))
 
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
-    flexDirection: 'column'
+    flexDirection: 'column',
   },
   copyRight: {
     width: '100%',
     alignSelf: 'center',
-    padding: theme.spacing(2)
+    padding: theme.spacing(2),
   },
   marginLeft: {
     [theme.breakpoints.up('md')]: {
-      marginLeft: drawerWidth
-    }
+      marginLeft: drawerWidth,
+    },
   },
 }))
 
 export const Copyright = () => {
   return (
-      <Typography variant="body2" color="textSecondary" align="center">
-        {'Copyright © Shunsuke Nagashima'}
-        {new Date().getFullYear()}
-        {'.'}
-      </Typography>
-
-  );
+    <Typography variant="body2" color="textSecondary" align="center">
+      {'Copyright © Shunsuke Nagashima'}
+      {new Date().getFullYear()}
+      {'.'}
+    </Typography>
+  )
 }
 
 const App = () => {
+  const {
+    login,
+    logout,
+    token,
+    userId,
+    allProjects,
+    selectProject,
+    selectedProject,
+    open,
+    closeConfimation,
+  } = useAuth()
 
-  const { login, logout, token, userId, allProjects, selectProject, selectedProject, open, closeConfimation } = useAuth();
-
-  const classes = useStyles();
+  const classes = useStyles()
 
   let routes: JSX.Element
   let contents: JSX.Element
@@ -61,31 +73,30 @@ const App = () => {
   if (token && selectedProject) {
     routes = (
       <Switch>
-        <Route path='/dashboard'>
-          <Dashboard />
-        </Route>
-        <Route path='/tasks/new' exact>
+        <Route path="/tasks/new" exact>
           <NewTask />
         </Route>
-        <Route path='/tasks/:taskId'>
+        <Route path="/tasks/:taskId">
           <UpdateTask />
         </Route>
-        <Route path='/tasks'>
+        <Route path="/tasks">
           <TaskList />
         </Route>
-        <Route path='/projects/new'>
+        <Route path="/projects/new">
           <NewProject />
         </Route>
-        <Route path='/projects/invite'>
+        <Route path="/projects/invite">
           <InviteUser />
         </Route>
-        <Redirect to='/tasks' />
+        <Redirect to="/tasks" />
       </Switch>
     )
     contents = (
       <div className={classes.root}>
         <Navigation />
-        <MainContent content={routes} />
+        <Suspense fallback={<LoadingSpinner isLoading={true} />}>
+          <MainContent content={routes} />
+        </Suspense>
         <Box pt={4} className={`${classes.copyRight} ${classes.marginLeft}`}>
           <Copyright />
         </Box>
@@ -94,19 +105,21 @@ const App = () => {
   } else if (token) {
     routes = (
       <Switch>
-        <Route path='/projects/new'>
+        <Route path="/projects/new">
           <NewProject />
         </Route>
-        <Route path='/projects'>
+        <Route path="/projects">
           <ChooseProject />
-         </Route>
-         <Redirect to='/projects' />
+        </Route>
+        <Redirect to="/projects" />
       </Switch>
     )
     contents = (
       <div className={classes.root}>
         <Header />
-        {routes}
+        <Suspense fallback={<LoadingSpinner isLoading={true} />}>
+          {routes}
+        </Suspense>
         <Box pt={4} className={classes.copyRight}>
           <Copyright />
         </Box>
@@ -115,22 +128,24 @@ const App = () => {
   } else {
     routes = (
       <Switch>
-        <Route path='/projects/addUser/'>
-          <Auth loginMode={true}/>
+        <Route path="/projects/addUser/">
+          <Auth loginMode={true} />
         </Route>
-        <Route path='/' exact>
+        <Route path="/" exact>
           <TopPage />
         </Route>
-        <Route path='/auth'>
-          <Auth loginMode={true}/>
+        <Route path="/auth">
+          <Auth loginMode={true} />
         </Route>
-        <Redirect to='/' />
+        <Redirect to="/" />
       </Switch>
     )
     contents = (
       <div className={classes.root}>
         <Header />
-        {routes}
+        <Suspense fallback={<LoadingSpinner isLoading={true} />}>
+          {routes}
+        </Suspense>
       </div>
     )
   }
@@ -142,18 +157,18 @@ const App = () => {
         token,
         userId,
         login,
-        logout
+        logout,
       }}
     >
       <ProjectContext.Provider
         value={{
           selectedProject,
           selectProject,
-          allProjects
+          allProjects,
         }}
       >
         <Router>
-          { contents}
+          {contents}
 
           <AlertDialog
             show={open}
@@ -162,15 +177,12 @@ const App = () => {
             ok={'ログイン画面へ'}
             closeDialog={closeConfimation}
             actionForYes={logout}
-            redirectTo='/auth'
+            redirectTo="/auth"
           />
         </Router>
-
       </ProjectContext.Provider>
-
     </AuthContext.Provider>
-
-  );
+  )
 }
 
-export default App;
+export default App

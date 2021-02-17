@@ -1,8 +1,8 @@
-import React, { useContext } from 'react';
-import { useHistory } from 'react-router-dom';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import { Link, Button, Toolbar, AppBar } from '@material-ui/core';
-import { AuthContext } from '../../contexts/auth-context';
+import React, { useContext } from 'react'
+import { useHistory } from 'react-router-dom'
+import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
+import { Link, Button, Toolbar, AppBar } from '@material-ui/core'
+import { AuthContext } from '../../contexts/auth-context'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -13,18 +13,18 @@ const useStyles = makeStyles((theme: Theme) =>
       marginRight: theme.spacing(2),
     },
     title: {
-      fontSize: '1.5em'
+      fontSize: '1.5em',
     },
     flexGlow: {
       flexGrow: 1,
-    }
+    },
   }),
-);
+)
 
 const Header = () => {
-  const classes = useStyles();
+  const classes = useStyles()
   const authContext = useContext(AuthContext)
-  const history = useHistory();
+  const history = useHistory()
 
   return (
     <div className={classes.root}>
@@ -34,25 +34,26 @@ const Header = () => {
             underline="none"
             color="inherit"
             href="/"
-            className={classes.title}>
+            className={classes.title}
+          >
             WhatUDo
           </Link>
           <div className={classes.flexGlow} />
-          { authContext.isLoggedIn && (
+          {authContext.isLoggedIn && (
             <Button
               variant="outlined"
               color="inherit"
               onClick={authContext.logout}
-              >
+            >
               Logout
             </Button>
           )}
-          { !authContext.isLoggedIn && (
+          {!authContext.isLoggedIn && (
             <Button
               variant="outlined"
               color="inherit"
-              onClick={() => history.push('/auth', {loginMode: true})}
-              >
+              onClick={() => history.push('/auth', { loginMode: true })}
+            >
               Login
             </Button>
           )}
@@ -60,6 +61,6 @@ const Header = () => {
       </AppBar>
     </div>
   )
-};
+}
 
-export default Header;
+export default Header
