@@ -220,7 +220,7 @@ const TaskList = () => {
     const updatedTasks = loadedTasks.filter((t) => t._id !== taskId)
     setMessage(responseData.data.message)
     setShowSnackBar(true)
-    setLoadedTask(updatedTasks)
+    setFilteredTasks(updatedTasks)
   }
 
   const columns: ColDef[] = [
