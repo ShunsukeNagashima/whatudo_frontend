@@ -49,6 +49,14 @@ export const useAuth = () => {
     localStorage.setItem('userData', JSON.stringify(storedData));
   }, [])
 
+  const showLogoutConfimation = useCallback(() => {
+    setOpen(true)
+  }, [])
+
+  const closeConfimation = useCallback(() => {
+    setOpen(false);
+  }, [])
+
   useEffect(() => {
     if(token && tokenExpiration) {
       const remainTime = tokenExpiration.getTime() - new Date().getTime();
@@ -56,7 +64,7 @@ export const useAuth = () => {
     } else {
       clearTimeout(logoutTimer)
     }
-  }, [token, logout, tokenExpiration])
+  }, [token, logout, tokenExpiration, showLogoutConfimation])
 
   useEffect(() => {
     let storedData;
@@ -68,15 +76,9 @@ export const useAuth = () => {
       login(storedData.userId, storedData.token, storedData.projects, new Date(storedData.expiration));
       selectProject(storedData.project)
     }
-  },[login])
+  },[login, selectProject])
 
-  const showLogoutConfimation = useCallback(() => {
-    setOpen(true)
-  }, [])
 
-  const closeConfimation = useCallback(() => {
-    setOpen(false);
-  }, [])
 
   return { login, logout, token, userId, allProjects, selectProject, selectedProject, open, closeConfimation }
 }

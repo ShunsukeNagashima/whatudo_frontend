@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { useParams } from 'react-router-dom';
-import { useHttpClient } from '../../shared/hooks/http-hook';
-import { AuthContext } from '../../shared/contexts/auth-context';
-import { ProjectContext } from '../../shared/contexts/project-context';
-import { useForm, Controller } from 'react-hook-form';
+import React, { useState, useEffect, useContext } from 'react'
+import { useParams } from 'react-router-dom'
+import { useHttpClient } from '../../shared/hooks/http-hook'
+import { AuthContext } from '../../shared/contexts/auth-context'
+import { ProjectContext } from '../../shared/contexts/project-context'
+import { useForm, Controller } from 'react-hook-form'
 import {
   Container,
   FormControl,
@@ -13,261 +13,248 @@ import {
   TextField,
   Typography,
   Button,
-  Divider
-} from '@material-ui/core';
+  Divider,
+} from '@material-ui/core'
 import DateFnsUtils from '@date-io/date-fns'
 import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker,
-} from '@material-ui/pickers';
-import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner';
-import { formStyles, PrettoSlider } from '../../assets/formStyles';
-import { IFormInputs } from '../../shared/interfaces/shared-interfaces';
+} from '@material-ui/pickers'
+import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner'
+import { formStyles, PrettoSlider } from '../../assets/formStyles'
+import { IFormInputs } from '../../shared/interfaces/shared-interfaces'
 import CommentList from '../components/CommentList'
 import Snackbar from '../../shared/components/UIElements/SnackBar'
-import Modal from '../../shared/components/UIElements/Modal';
-
+import Modal from '../../shared/components/UIElements/Modal'
 
 interface IParams {
-  taskId: string;
+  taskId: string
 }
 
 const UpdateTask = () => {
   const classes = formStyles()
-  const [ loadedTask, setLoadedTask ] = useState<IFormInputs | null>();
-  const [ fetchedUsers, setFetchedUsers ] = useState<any[]>([]);
-  const [ fetchedCategories, setFetchedCategories ] = useState<any[]>([]);
-  const [ showCommentInput, setShowCommentInput ] = useState<boolean>(false);
-  const [ message, setMessage ] = useState<string>('');
-  const [ showSnackBar, setShowSnackBar ] = useState<boolean>(false);
-  const { loading, error, sendRequest, clearError } = useHttpClient();
-  const authContext = useContext(AuthContext);
-  const projectContext = useContext(ProjectContext);
+  const [loadedTask, setLoadedTask] = useState<IFormInputs | null>()
+  const [fetchedUsers, setFetchedUsers] = useState<any[]>([])
+  const [fetchedCategories, setFetchedCategories] = useState<any[]>([])
+  const [showCommentInput, setShowCommentInput] = useState<boolean>(false)
+  const [message, setMessage] = useState<string>('')
+  const [showSnackBar, setShowSnackBar] = useState<boolean>(false)
+  const { loading, error, sendRequest, clearError } = useHttpClient()
+  const authContext = useContext(AuthContext)
+  const projectContext = useContext(ProjectContext)
   const { handleSubmit, control, errors, formState } = useForm<IFormInputs>({
     mode: 'onChange',
-  });
+  })
 
-  const taskId = useParams<IParams>().taskId;
+  const taskId = useParams<IParams>().taskId
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const responseData = await sendRequest(
-          'http://localhost:5000/api/users/' + projectContext.selectedProject!._id,
+          `${process.env.REACT_APP_BACKEND_URL}/users/${
+            projectContext.selectedProject!._id
+          }`,
           'GET',
           null,
           {
-            Authorization: 'Bearer ' + authContext.token
-          }
+            Authorization: 'Bearer ' + authContext.token,
+          },
         )
         setFetchedUsers(responseData.data)
-      } catch(err) {
-        console.log(err)
-        throw err
-      }
+      } catch (err) {}
     }
     fetchUser()
-  }, [sendRequest, taskId])
+  }, [sendRequest, taskId, authContext.token, projectContext.selectedProject])
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const responseData = await sendRequest(
-          'http://localhost:5000/api/categories',
+          `${process.env.REACT_APP_BACKEND_URL}/categories`,
           'GET',
           null,
           {
-            Authorization: 'Bearer ' + authContext.token
-          }
+            Authorization: 'Bearer ' + authContext.token,
+          },
         )
         setFetchedCategories(responseData.data)
-      } catch(err) {
-        throw err;
-      }
+      } catch (err) {}
     }
     fetchCategories()
-  }, [sendRequest, taskId])
+  }, [sendRequest, taskId, authContext.token])
 
   useEffect(() => {
     const fetchTask = async () => {
       try {
         const responseData = await sendRequest(
-          `http://localhost:5000/api/tasks/task/${taskId}?projectId=${projectContext.selectedProject!._id}`,
-           'GET',
-           null,
-           {
-             Authorization: 'Bearer ' + authContext.token
-           }
+          `${
+            process.env.REACT_APP_BACKEND_URL
+          }/tasks/task/${taskId}?projectId=${
+            projectContext.selectedProject!._id
+          }`,
+          'GET',
+          null,
+          {
+            Authorization: 'Bearer ' + authContext.token,
+          },
         )
         setLoadedTask(responseData.data)
-        console.log(responseData.data.limitDate)
-      } catch(err) {
-        console.log(err);
-      }
-    };
-    fetchTask();
-  }, [sendRequest, taskId])
+      } catch (err) {}
+    }
+    fetchTask()
+  }, [sendRequest, taskId, authContext.token, projectContext.selectedProject])
 
   const taskSubmitHandler = async (data: IFormInputs) => {
-      setLoadedTask(null);
-      try {
-        const responseData = await sendRequest(
-          `http://localhost:5000/api/tasks/task/${taskId}?projectId=${projectContext.selectedProject!._id}`,
-          'PATCH',
-          {
-            title: data.title,
-            description: data.description,
-            limitDate: data.limitDate,
-            status: data.status,
-            progress: data.progress,
-            comment: {
-               title: data.commentTitle,
-               detail: data.commentDetail,
-            },
-            modifiedBy: authContext.userId,
-            personInCharge: data.personInCharge,
-            category: data.category,
+    setLoadedTask(null)
+    try {
+      const responseData = await sendRequest(
+        `${process.env.REACT_APP_BACKEND_URL}/tasks/task/${taskId}?projectId=${
+          projectContext.selectedProject!._id
+        }`,
+        'PATCH',
+        {
+          title: data.title,
+          description: data.description,
+          limitDate: data.limitDate,
+          status: data.status,
+          progress: data.progress,
+          comment: {
+            title: data.commentTitle,
+            detail: data.commentDetail,
           },
-          {
-            Authorization: 'Bearer ' + authContext.token
-          },
-        )
-        console.log(responseData.data.task)
-        setMessage(responseData.data.message);
-        setShowSnackBar(true)
-        setLoadedTask(responseData.data.task)
-      } catch(err) {
-        console.log(err);
-        throw(err)
-      }
-  };
+          modifiedBy: authContext.userId,
+          personInCharge: data.personInCharge,
+          category: data.category,
+        },
+        {
+          Authorization: 'Bearer ' + authContext.token,
+        },
+      )
+      setMessage(responseData.data.message)
+      setShowSnackBar(true)
+      setLoadedTask(responseData.data.task)
+    } catch (err) {}
+  }
 
   const closeSnackBarHandler = () => {
-    setShowSnackBar(false);
-  };
+    setShowSnackBar(false)
+  }
 
   const switchShowModeHandler = () => {
-    setShowCommentInput(prevSate => !prevSate)
-  };
+    setShowCommentInput((prevSate) => !prevSate)
+  }
 
-  let errorModal;
+  let errorModal
   if (error?.response) {
-    errorModal =  (
-        <Modal
-          title={error.response?.statusText}
-          description={error.response?.data.message}
-          show={!!error}
-          closeModal={clearError}
-        />
+    errorModal = (
+      <Modal
+        title={error.response?.statusText}
+        description={error.response?.data.message}
+        show={!!error}
+        closeModal={clearError}
+      />
     )
   }
-
-  if (loading) {
-    return (
-      <LoadingSpinner isLoading={loading}/>
-    )
-  }
-
-  console.log(loadedTask);
 
   return (
     <Container className={classes.form} component="main" maxWidth="md">
       {!loading && loadedTask! && (
         <React.Fragment>
           {errorModal}
-          {loading && <LoadingSpinner isLoading={!loadedTask}/>}
-          <form id='taskForm' className={classes.form} onSubmit={handleSubmit(taskSubmitHandler)}>
+          {loading && <LoadingSpinner isLoading={!loadedTask} />}
+          <form
+            id="taskForm"
+            className={classes.form}
+            onSubmit={handleSubmit(taskSubmitHandler)}
+          >
             <FormControl className={classes.formControl}>
               <InputLabel id="category">カテゴリ(必須)</InputLabel>
               <Controller
                 as={
-                  <Select
-                    id="category"
-                    labelId="category"
-                  >
-                    {
-                      fetchedCategories && fetchedCategories.map(c => {
-                        return <MenuItem value={c._id}>{c.name}</MenuItem>
-                      })
-                    }
+                  <Select id="category" labelId="category">
+                    {fetchedCategories &&
+                      fetchedCategories.map((c) => {
+                        return (
+                          <MenuItem key={c._id} value={c._id}>
+                            {c.name}
+                          </MenuItem>
+                        )
+                      })}
                   </Select>
                 }
                 defaultValue={loadedTask!.category}
                 name="category"
                 control={control}
-                rules={{ required: 'カテゴリは必須です'}}
-                />
+                rules={{ required: 'カテゴリは必須です' }}
+              />
             </FormControl>
 
             <Controller
               as={
                 <TextField
-                  error={errors.title? true: false}
-                  variant='outlined'
-                  margin='normal'
+                  error={errors.title ? true : false}
+                  variant="outlined"
+                  margin="normal"
                   fullWidth
-                  id='title'
-                  label='タスク名(必須)'
-                  // helperText={errors.title!.message}
+                  id="title"
+                  label="タスク名(必須)"
+                  helperText={errors?.title?.message}
                 />
               }
               defaultValue={loadedTask!.title}
-              name='title'
+              name="title"
               control={control}
-              rules={{required: "タスク名は必須です。"}}
+              rules={{ required: 'タスク名は必須です。' }}
             />
 
             <Controller
               as={
                 <TextField
-                  variant='outlined'
-                  margin='normal'
+                  variant="outlined"
+                  margin="normal"
                   fullWidth
                   multiline
                   rows={5}
-                  id='description'
+                  id="description"
                   label="説明"
                 />
               }
               defaultValue={loadedTask!.description}
-              name='description'
+              name="description"
               control={control}
             />
 
             <MuiPickersUtilsProvider utils={DateFnsUtils}>
               <Controller
-                name='limitDate'
+                name="limitDate"
                 control={control}
-                render={({ref, ...rest}) => (
+                render={({ ref, ...rest }) => (
                   <KeyboardDatePicker
                     autoOk
                     disableToolbar
-                    variant='inline'
-                    format='yyyy/MM/dd'
-                    margin='normal'
+                    variant="inline"
+                    format="yyyy/MM/dd"
+                    margin="normal"
                     id="limitDate"
                     label="期限"
                     KeyboardButtonProps={{
-                      'aria-label': 'change date'
+                      'aria-label': 'change date',
                     }}
                     className={classes.formControl}
-                    style={{width: '140px'}}
+                    style={{ width: '140px' }}
                     {...rest}
                   />
                 )}
                 defaultValue={new Date(loadedTask!.limitDate)}
               />
-
             </MuiPickersUtilsProvider>
 
             <FormControl className={classes.formControl}>
               <InputLabel id="status">状況</InputLabel>
               <Controller
                 as={
-                  <Select
-                    id="status"
-                    labelId="status"
-                  >
+                  <Select id="status" labelId="status">
                     <MenuItem value="新規">新規</MenuItem>
                     <MenuItem value="進行中">進行中</MenuItem>
                     <MenuItem value="確認待ち">確認待ち</MenuItem>
@@ -277,7 +264,7 @@ const UpdateTask = () => {
                 name="status"
                 control={control}
                 defaultValue={loadedTask!.status}
-                />
+              />
             </FormControl>
 
             <FormControl className={classes.formControl}>
@@ -288,81 +275,92 @@ const UpdateTask = () => {
                     <MenuItem value="">
                       <em>未定</em>
                     </MenuItem>
-                    { fetchedUsers && fetchedUsers.map(u => {
-                      return <MenuItem value={u.id}>{u.name}</MenuItem>
-                    })}
+                    {fetchedUsers &&
+                      fetchedUsers.map((u) => {
+                        return (
+                          <MenuItem key={u.id} value={u.id}>
+                            {u.name}
+                          </MenuItem>
+                        )
+                      })}
                   </Select>
                 }
-                name='personInCharge'
+                name="personInCharge"
                 control={control}
                 defaultValue={loadedTask!.personInCharge}
               />
             </FormControl>
 
             <FormControl>
-              <Typography gutterBottom className={classes.margin_top}>進捗率</Typography>
+              <Typography gutterBottom className={classes.margin_top}>
+                進捗率
+              </Typography>
               <Controller
-                render={props =>
+                render={(props) => (
                   <PrettoSlider
                     {...props}
                     valueLabelDisplay="auto"
                     aria-label="pretto slider"
                     onChange={(_, value) => props.onChange(value)}
                   />
-                }
-                name='progress'
+                )}
+                name="progress"
                 control={control}
                 defaultValue={loadedTask!.progress}
               />
             </FormControl>
-
           </form>
 
           {loadedTask!.comments && (
-            <CommentList comments={loadedTask!.comments} taskId={loadedTask!._id}/>
+            <CommentList
+              comments={loadedTask!.comments}
+              taskId={loadedTask!._id}
+            />
           )}
 
-          <Divider variant='middle' className={classes.margin_top}/>
+          <Divider variant="middle" className={classes.margin_top} />
 
-          <Button onClick={switchShowModeHandler} color='primary'>コメントを追記する</Button>
+          <Button onClick={switchShowModeHandler} color="primary">
+            コメントを追記する
+          </Button>
 
-            { showCommentInput && (
-              <React.Fragment>
-                 <Controller
-                    as={
-                      <TextField
-                        error={errors.title? true: false}
-                        variant='outlined'
-                        margin='normal'
-                        fullWidth
-                        id='commentTitle'
-                        label="タイトル"
-                        // helperText={errors.title!.message}
-                      />
-                    }
-                    name='commentTitle'
-                    control={control}
-                    form='taskForm'
+          {showCommentInput && (
+            <React.Fragment>
+              <Controller
+                as={
+                  <TextField
+                    error={errors.title ? true : false}
+                    variant="outlined"
+                    margin="normal"
+                    fullWidth
+                    id="commentTitle"
+                    label="タイトル"
+                    // helperText={errors.title!.message}
                   />
+                }
+                name="commentTitle"
+                control={control}
+                form="taskForm"
+              />
 
-                  <Controller
-                    as={
-                      <TextField
-                        variant='outlined'
-                        margin='normal'
-                        fullWidth
-                        multiline
-                        rows={5}
-                        id='commentDetail'
-                        label="詳細"
-                      />
-                    }
-                    name='commentDetail'
-                    control={control}
-                    form='taskForm'
+              <Controller
+                as={
+                  <TextField
+                    variant="outlined"
+                    margin="normal"
+                    fullWidth
+                    multiline
+                    rows={5}
+                    id="commentDetail"
+                    label="詳細"
                   />
-              </React.Fragment>
-             )}
+                }
+                name="commentDetail"
+                control={control}
+                form="taskForm"
+              />
+            </React.Fragment>
+          )}
 
           <Button
             type="submit"
@@ -371,16 +369,17 @@ const UpdateTask = () => {
             className={classes.submit}
             disabled={!formState.isValid}
             form="taskForm"
-          >タスク更新</Button>
+          >
+            タスク更新
+          </Button>
         </React.Fragment>
       )}
 
-        <Snackbar
-          open={showSnackBar}
-          close={closeSnackBarHandler}
-          message={message}
-        />
-
+      <Snackbar
+        open={showSnackBar}
+        close={closeSnackBarHandler}
+        message={message}
+      />
     </Container>
   )
 }

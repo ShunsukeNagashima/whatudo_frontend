@@ -1,89 +1,91 @@
-import React, {useState, useContext} from 'react';
-import {
-  Container,
-  Button,
-  TextField,
-  Typography,
-} from '@material-ui/core'
-import { useHttpClient } from '../../shared/hooks/http-hook';
-import { ProjectContext } from '../../shared/contexts/project-context';
-import { AuthContext } from '../../shared/contexts/auth-context';
-import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner';
-import Modal from '../../shared/components/UIElements/Modal';
-import { makeStyles } from '@material-ui/core/styles';
+import React, { useState, useContext } from 'react'
+import { Container, Button, TextField, Typography } from '@material-ui/core'
+import { useHttpClient } from '../../shared/hooks/http-hook'
+import { ProjectContext } from '../../shared/contexts/project-context'
+import { AuthContext } from '../../shared/contexts/auth-context'
+import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner'
+import Modal from '../../shared/components/UIElements/Modal'
+import { makeStyles } from '@material-ui/core/styles'
 
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    marginTop: theme.spacing(4)
+    marginTop: theme.spacing(4),
   },
   linkField: {
-    width: '90%'
+    width: '90%',
   },
   marginTop: {
-    marginTop: theme.spacing(2)
-  }
+    marginTop: theme.spacing(2),
+  },
 }))
 
 const InviteUser = () => {
-
-  const { loading, error, sendRequest, clearError } = useHttpClient();
-  const [ inviteLink, setInviteLink ] = useState<string>('');
-  const authContext = useContext(AuthContext);
-  const projectContext = useContext(ProjectContext);
-  const classes = useStyles();
+  const { loading, error, sendRequest, clearError } = useHttpClient()
+  const [inviteLink, setInviteLink] = useState<string>('')
+  const authContext = useContext(AuthContext)
+  const projectContext = useContext(ProjectContext)
+  const classes = useStyles()
 
   const createInvitationLink = async () => {
     const responseData = await sendRequest(
-      `http://localhost:5000/api/projects/invite/${projectContext.selectedProject!._id}`,
+      `${process.env.REACT_APP_BACKEND_URL}/projects/invite/${
+        projectContext.selectedProject!._id
+      }`,
       'GET',
       null,
       {
-        Authorization: `Bearer ${authContext.token}`
-      }
+        Authorization: `Bearer ${authContext.token}`,
+      },
     )
-    const token = responseData.data.invitationToken;
-    console.log(responseData);
-    const url = `http://localhost:3000/projects/addUser?token=${token}`
-    setInviteLink(url);
+    const token = responseData.data.invitationToken
+    const url = `${process.env.REACT_APP_FRONTEND_URL}/projects/addUser?token=${token}`
+    setInviteLink(url)
   }
 
-  let errorModal;
+  let errorModal
   if (error?.response) {
-    errorModal =  (
-        <Modal
-          title={error.response?.statusText}
-          description={error.response?.data.message}
-          show={!!error}
-          closeModal={clearError}
-        />
+    errorModal = (
+      <Modal
+        title={error.response?.statusText}
+        description={error.response?.data.message}
+        show={!!error}
+        closeModal={clearError}
+      />
     )
   }
 
   return (
     <Container className={classes.root}>
-      { errorModal }
+      {errorModal}
       {loading && <LoadingSpinner isLoading={loading} />}
-      <Typography component='h3' variant='h4' color='textSecondary'>
+      <Typography component="h3" variant="h4" color="textSecondary">
         メンバー招待
       </Typography>
-      <Typography component='h5' variant='h6' color='textSecondary' className={classes.marginTop}>
-        「招待リンク」ボタンをクリックして、生成されたURLを招待するメンバーに送信してください。<br/>
+      <Typography
+        component="h5"
+        variant="h6"
+        color="textSecondary"
+        className={classes.marginTop}
+      >
+        「招待リンク」ボタンをクリックして、生成されたURLを招待するメンバーに送信してください。
+        <br />
         リンクの有効期限は30分です。
       </Typography>
-      {!loading && inviteLink &&
-      <TextField
-        className={`${classes.linkField} ${classes.marginTop}`}
-        variant='outlined'
-        multiline
-        rows={4}
-        value={inviteLink}
-        inputProps={{
-          readOnly: true
-        }}/>
-      }
+      {!loading && inviteLink && (
+        <TextField
+          className={`${classes.linkField} ${classes.marginTop}`}
+          variant="outlined"
+          multiline
+          rows={4}
+          value={inviteLink}
+          inputProps={{
+            readOnly: true,
+          }}
+        />
+      )}
       <Button
         className={classes.marginTop}
         onClick={createInvitationLink}

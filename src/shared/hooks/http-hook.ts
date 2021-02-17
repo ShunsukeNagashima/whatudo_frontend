@@ -24,7 +24,6 @@ export const useHttpClient = () => {
           headers,
           cancelToken: signal.token
         })
-        console.log(headers)
 
         if (!(responseData.status === 200 || responseData.status === 201)) {
           throw new Error(responseData.data.message);
@@ -33,7 +32,6 @@ export const useHttpClient = () => {
         setLoading(false);
         return responseData
       } catch(err) {
-        console.log(err.response)
         setError(err);
         setLoading(false);
         throw err
