@@ -223,7 +223,11 @@ const NewTask = () => {
                 </MenuItem>
                 {fetchedUsers &&
                   fetchedUsers.map((u) => {
-                    return <MenuItem key={u.id} value={u.id}>{u.name}</MenuItem>
+                    return (
+                      <MenuItem key={u.id} value={u.id}>
+                        {u.name}
+                      </MenuItem>
+                    )
                   })}
               </Select>
             }

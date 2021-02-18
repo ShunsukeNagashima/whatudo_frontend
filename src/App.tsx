@@ -118,7 +118,7 @@ const App = () => {
       <div className={classes.root}>
         <Header />
         <Suspense fallback={<LoadingSpinner isLoading={true} />}>
-          {routes}
+        {routes}
         </Suspense>
         <Box pt={4} className={classes.copyRight}>
           <Copyright />
