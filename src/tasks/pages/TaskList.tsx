@@ -116,7 +116,7 @@ const TaskList = () => {
   const [searchOptions, setSearchOptions] = useState<
     { [key: string]: string }[]
   >([])
-  const [options, setOptions] = useState<{ _id: string; name: string }[]>([])
+  const [options, setOptions] = useState<{ id: string; name: string }[]>([])
   const [showSelect, setShowSelect] = useState<boolean>(false)
   const [fetchedCategories, setFetchedCategories] = useState<any[]>([])
   const [fetchedUsers, setFetchedUsers] = useState<any[]>([])
@@ -350,10 +350,10 @@ const TaskList = () => {
         break
       case 'ステータス':
         setOptions([
-          { _id: '新規', name: '新規' },
-          { _id: '進行中', name: '進行中' },
-          { _id: '確認待ち', name: '確認待ち' },
-          { _id: '完了', name: '完了' },
+          { id: '新規', name: '新規' },
+          { id: '進行中', name: '進行中' },
+          { id: '確認待ち', name: '確認待ち' },
+          { id: '完了', name: '完了' },
         ])
         break
     }
@@ -429,7 +429,7 @@ const TaskList = () => {
               {options.length > 0 &&
                 options.map((o) => {
                   return (
-                    <MenuItem key={o._id} value={o._id}>
+                    <MenuItem key={o.id} value={o.id}>
                       {o.name}
                     </MenuItem>
                   )
