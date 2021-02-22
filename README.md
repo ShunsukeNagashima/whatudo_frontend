@@ -40,7 +40,7 @@ You will also see any lint errors in the console.
 
 
 ## Author
-Shunsuke Nagashima 
+Shunsuke Nagashima <br/>
 Twitter: https://twitter.com/shun_n_dr
 
 
